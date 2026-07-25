@@ -1,0 +1,656 @@
+.wt-member-help {
+    --pmh-border: rgba(40, 50, 60, .16);
+    --pmh-muted: var(--bs-secondary-color, #64727d);
+    --pmh-text: var(--bs-body-color, #263238);
+    --pmh-heading: var(--bs-body-color, #20332f);
+    --pmh-surface: var(--bs-body-bg, #fff);
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem;
+    color: var(--pmh-text);
+}
+
+.pmh-hero {
+    padding: clamp(1.35rem, 4vw, 3rem);
+    border: 1px solid var(--pmh-border);
+    border-radius: 1.25rem;
+    background: linear-gradient(135deg, rgba(124, 92, 45, .12), rgba(67, 100, 117, .10));
+    margin-bottom: 2rem;
+    color: var(--pmh-text);
+}
+
+.wt-member-help .pmh-hero h1,
+.wt-member-help .pmh-page-title {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    line-height: 1.12;
+    margin: .15rem 0 .65rem;
+    color: var(--pmh-heading) !important;
+    opacity: 1 !important;
+    text-shadow: none !important;
+}
+
+.pmh-eyebrow,
+.pmh-topic {
+    font-size: .78rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--pmh-muted) !important;
+}
+
+.pmh-search {
+    display: flex;
+    gap: .65rem;
+    max-width: 780px;
+    margin-top: 1.35rem;
+}
+
+.pmh-search input {
+    min-height: 3rem;
+}
+
+.pmh-category-grid,
+.pmh-list-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(245px, 1fr));
+    gap: 1rem;
+}
+
+.pmh-category-card,
+.pmh-article-card,
+.pmh-side-card,
+.pmh-article-body {
+    border: 1px solid var(--pmh-border);
+    border-radius: 1rem;
+    background: var(--pmh-surface);
+    box-shadow: 0 .25rem 1rem rgba(20, 30, 40, .05);
+    color: var(--pmh-text);
+}
+
+.pmh-category-card {
+    display: flex;
+    flex-direction: column;
+    gap: .4rem;
+    padding: 1.15rem;
+    color: var(--pmh-text);
+    text-decoration: none;
+}
+
+.pmh-category-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 .5rem 1.4rem rgba(20, 30, 40, .10);
+}
+
+.pmh-category-title {
+    font-size: 1.12rem;
+    font-weight: 700;
+}
+
+.pmh-article-list {
+    margin-top: 2.2rem;
+}
+
+.pmh-section-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.pmh-article-card {
+    padding: 1.2rem;
+}
+
+.pmh-article-card h3 {
+    font-size: 1.18rem;
+    margin: .45rem 0;
+}
+
+.pmh-article-card h3 a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.pmh-read-link {
+    font-weight: 700;
+}
+
+.pmh-breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .55rem;
+    margin: .5rem 0 1.1rem;
+}
+
+.pmh-article-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(240px, 1fr);
+    gap: 1.25rem;
+    align-items: start;
+}
+
+.pmh-article-body {
+    padding: clamp(1.25rem, 4vw, 2.6rem);
+}
+
+.pmh-article-body > header {
+    margin: 0 0 1.35rem;
+    padding: 0;
+}
+
+.wt-member-help .pmh-article-body .pmh-article-title {
+    display: block;
+    font-size: clamp(2rem, 4vw, 3rem);
+    line-height: 1.14;
+    margin: .55rem 0 .7rem;
+    color: var(--pmh-heading) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    text-shadow: none !important;
+}
+
+.pmh-lead {
+    margin: 0;
+    font-size: 1.18rem;
+    color: var(--pmh-muted) !important;
+}
+
+.pmh-rich-text {
+    font-size: 1.04rem;
+    line-height: 1.72;
+    color: var(--pmh-text);
+}
+
+.wt-member-help .pmh-rich-text h1,
+.wt-member-help .pmh-rich-text h2,
+.wt-member-help .pmh-rich-text h3,
+.wt-member-help .pmh-rich-text h4,
+.wt-member-help .pmh-rich-text h5,
+.wt-member-help .pmh-rich-text h6,
+.wt-member-help .pmh-side-card h2,
+.wt-member-help .pmh-section-heading h2,
+.wt-member-help .pmh-article-card h3,
+.wt-member-help .pmh-category-title {
+    color: var(--pmh-heading) !important;
+    opacity: 1 !important;
+    text-shadow: none !important;
+}
+
+.pmh-rich-text h2 {
+    font-size: 1.35rem;
+    line-height: 1.25;
+    margin: 1.8rem 0 .65rem;
+}
+
+.pmh-rich-text h3 {
+    font-size: 1.18rem;
+    line-height: 1.3;
+    margin: 1.45rem 0 .55rem;
+}
+
+.pmh-rich-text h2:first-child,
+.pmh-rich-text h3:first-child {
+    margin-top: 0;
+}
+
+.pmh-rich-text p:first-child {
+    margin-top: 0;
+}
+
+.pmh-rich-text li {
+    margin-bottom: .45rem;
+}
+
+.pmh-sidebar {
+    display: grid;
+    gap: 1rem;
+}
+
+.pmh-side-card {
+    padding: 1.15rem;
+}
+
+.pmh-side-card h2 {
+    font-size: 1.1rem;
+    line-height: 1.25;
+    margin: 0 0 .55rem;
+}
+
+.pmh-side-card ul {
+    padding-left: 1.1rem;
+    margin-bottom: 0;
+}
+
+.pmh-side-card li {
+    margin: .5rem 0;
+}
+
+.pmh-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .45rem;
+}
+
+.pmh-feature-badge {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid rgba(67, 100, 117, .28);
+    border-radius: 999px;
+    background: rgba(67, 100, 117, .09);
+    padding: .18rem .52rem;
+    font-size: .72rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--pmh-text);
+}
+
+.pmh-module-status-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(235px, 1fr));
+    gap: .65rem;
+}
+
+.pmh-module-status {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    border: 1px solid var(--pmh-border);
+    border-radius: .75rem;
+    padding: .65rem .8rem;
+}
+
+.pmh-module-status .badge {
+    margin-left: auto;
+}
+
+.pmh-status-dot {
+    width: .7rem;
+    height: .7rem;
+    border-radius: 50%;
+    flex: 0 0 auto;
+}
+
+.pmh-status-dot.is-active {
+    background: #198754;
+}
+
+.pmh-status-dot.is-inactive {
+    background: #6c757d;
+}
+
+.pmh-rich-text table {
+    width: 100%;
+    margin: 1rem 0;
+    border-collapse: collapse;
+}
+
+.pmh-rich-text th,
+.pmh-rich-text td {
+    padding: .65rem;
+    border: 1px solid var(--pmh-border);
+    vertical-align: top;
+}
+
+.pmh-rich-text blockquote {
+    border-left: .3rem solid rgba(67, 100, 117, .38);
+    margin: 1.2rem 0;
+    padding: .3rem 0 .3rem 1rem;
+    color: var(--pmh-muted);
+}
+
+@media (max-width: 800px) {
+    .pmh-search {
+        flex-direction: column;
+    }
+
+    .pmh-search button {
+        width: 100%;
+    }
+
+    .pmh-section-heading {
+        align-items: start;
+        flex-direction: column;
+    }
+
+    .pmh-article-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .wt-member-help {
+        padding: .5rem;
+    }
+}
+
+/* Potts Modern has two separate navigation systems:
+ *  - the cream genealogy menu uses a tall icon-over-label layout;
+ *  - the dark utility menu uses compact, single-line links.
+ * Keep the tall alignment strictly scoped to the genealogy menu so it cannot
+ * push Theme, Language, History or Sign in onto different rows. */
+@media (min-width: 992px) {
+    .potts-genealogy-menu .potts-nav-feature > .potts-nav-feature-link,
+    .wt-primary-navigation .potts-nav-feature > .potts-nav-feature-link {
+        box-sizing: border-box !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        gap: .18rem !important;
+        min-height: 5.35rem !important;
+        padding-top: .55rem !important;
+        padding-bottom: .35rem !important;
+        line-height: 1.15 !important;
+    }
+
+    .potts-genealogy-menu .potts-nav-feature > .potts-nav-feature-link > .potts-nav-icon,
+    .wt-primary-navigation .potts-nav-feature > .potts-nav-feature-link > .potts-nav-icon {
+        display: block !important;
+        flex: 0 0 2rem !important;
+        width: 2rem !important;
+        height: 2rem !important;
+        margin: 0 !important;
+        background-position: center !important;
+        background-size: contain !important;
+    }
+
+    .potts-genealogy-menu .potts-nav-feature > .potts-nav-feature-link > .potts-nav-label,
+    .wt-primary-navigation .potts-nav-feature > .potts-nav-feature-link > .potts-nav-label {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        min-height: 1.35rem !important;
+        margin: 0 !important;
+        line-height: 1.15 !important;
+        text-align: center !important;
+        white-space: nowrap;
+    }
+
+    .potts-genealogy-menu .potts-nav-feature > .potts-nav-feature-link > .caret,
+    .wt-primary-navigation .potts-nav-feature > .potts-nav-feature-link > .caret {
+        margin-top: 0 !important;
+    }
+
+    /* Undo any genealogy-menu dimensions that have leaked into the dark
+     * masthead. Utility links must all share the same compact row and height. */
+    .potts-site-shell .potts-utility-menu,
+    .wt-header-wrapper .potts-utility-menu,
+    .wt-header-wrapper .wt-user-menu {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex-wrap: nowrap !important;
+        gap: clamp(.15rem, 1.1vw, .75rem) !important;
+        min-height: 3rem !important;
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+    }
+
+    .potts-site-shell .potts-utility-menu > .nav-item,
+    .wt-header-wrapper .potts-utility-menu > .nav-item,
+    .wt-header-wrapper .wt-user-menu > .nav-item {
+        display: flex !important;
+        align-items: center !important;
+        align-self: center !important;
+        min-height: 3rem !important;
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+    }
+
+    .potts-site-shell .potts-utility-menu > .nav-item > .nav-link,
+    .wt-header-wrapper .potts-utility-menu > .nav-item > .nav-link,
+    .wt-header-wrapper .wt-user-menu > .nav-item > .nav-link,
+    .potts-site-shell .potts-utility-menu > .nav-item > button,
+    .wt-header-wrapper .potts-utility-menu > .nav-item > button,
+    .wt-header-wrapper .wt-user-menu > .nav-item > button {
+        box-sizing: border-box !important;
+        display: inline-flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: auto !important;
+        height: 2.625rem !important;
+        min-height: 2.625rem !important;
+        margin: 0 !important;
+        padding: .45rem .9rem !important;
+        line-height: 1.2 !important;
+        white-space: nowrap !important;
+    }
+
+    .potts-site-shell .potts-utility-menu .potts-nav-feature-link,
+    .wt-header-wrapper .potts-utility-menu .potts-nav-feature-link,
+    .wt-header-wrapper .wt-user-menu .potts-nav-feature-link {
+        box-sizing: border-box !important;
+        display: inline-flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: .35rem !important;
+        width: auto !important;
+        height: auto !important;
+        min-height: 2.625rem !important;
+        margin: 0 !important;
+        padding: .45rem .9rem !important;
+        line-height: 1.2 !important;
+        white-space: nowrap !important;
+    }
+
+    .potts-site-shell .potts-utility-menu .potts-nav-feature-link > .potts-nav-icon,
+    .wt-header-wrapper .potts-utility-menu .potts-nav-feature-link > .potts-nav-icon,
+    .wt-header-wrapper .wt-user-menu .potts-nav-feature-link > .potts-nav-icon {
+        display: inline-block !important;
+        flex: 0 0 1.25rem !important;
+        width: 1.25rem !important;
+        height: 1.25rem !important;
+        margin: 0 !important;
+        background-position: center !important;
+        background-size: contain !important;
+    }
+
+    .potts-site-shell .potts-utility-menu .potts-nav-feature-link > .potts-nav-label,
+    .wt-header-wrapper .potts-utility-menu .potts-nav-feature-link > .potts-nav-label,
+    .wt-header-wrapper .wt-user-menu .potts-nav-feature-link > .potts-nav-label {
+        display: inline-flex !important;
+        align-items: center !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        line-height: 1.2 !important;
+        white-space: nowrap !important;
+    }
+
+    /* Historical Facts previously added a deliberate vertical offset. It is
+     * unnecessary once the whole utility menu uses one shared flex row. */
+    .potts-site-shell .potts-modern-history-region-item,
+    .wt-header-wrapper .potts-modern-history-region-item {
+        display: flex !important;
+        align-items: center !important;
+        align-self: center !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .potts-site-shell .potts-modern-history-region-link,
+    .wt-header-wrapper .potts-modern-history-region-link {
+        box-sizing: border-box !important;
+        position: static !important;
+        top: auto !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        min-height: 2.625rem !important;
+        margin: 0 !important;
+        padding: .45rem .9rem !important;
+        line-height: 1.2 !important;
+        white-space: nowrap !important;
+        transform: none !important;
+    }
+
+    .potts-site-shell .potts-utility-menu .dropdown-toggle::after,
+    .wt-header-wrapper .potts-utility-menu .dropdown-toggle::after,
+    .wt-header-wrapper .wt-user-menu .dropdown-toggle::after,
+    .potts-site-shell .potts-modern-history-region-link.dropdown-toggle::after,
+    .wt-header-wrapper .potts-modern-history-region-link.dropdown-toggle::after {
+        position: static !important;
+        align-self: center !important;
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+        margin-left: .35rem !important;
+        transform: none !important;
+    }
+}
+
+.pmh-feedback {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.35rem;
+    border-top: 1px solid var(--pmh-border);
+}
+
+.pmh-feedback h2 {
+    margin: 0 0 .3rem;
+    font-size: 1.2rem;
+    line-height: 1.25;
+    color: var(--pmh-heading) !important;
+}
+
+.pmh-feedback p {
+    margin: 0;
+    color: var(--pmh-muted);
+}
+
+.pmh-feedback-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .65rem;
+}
+
+.pmh-feedback-form .btn {
+    min-width: 6rem;
+}
+
+.pmh-feedback-thanks {
+    width: 100%;
+    border-radius: .8rem;
+    background: rgba(25, 135, 84, .08);
+    padding: .9rem 1rem;
+}
+
+/* Give the webtrees CKEditor a practical article-writing height. */
+#cke_pmh-body .cke_contents {
+    min-height: 32rem;
+}
+
+@media (max-width: 800px) {
+    #cke_pmh-body .cke_contents {
+        min-height: 22rem;
+    }
+}
+
+/* Contextual help links appear beside the webtrees feature being used.
+ * Potts Modern variables are preferred so the box follows all colour presets.
+ * Bootstrap and fixed fallbacks keep it readable in standard webtrees themes. */
+.pmh-contextual-help {
+    --pmh-border: var(--potts-line, rgba(40, 50, 60, .16));
+    --pmh-heading: var(--potts-ink, var(--bs-body-color, #20332f));
+    --pmh-card: var(--potts-card-solid, var(--bs-body-bg, #fff));
+    --pmh-accent: var(--potts-blue, var(--bs-primary, #3f6d78));
+    --pmh-accent-dark: var(--potts-blue-dark, var(--bs-primary, #315762));
+    display: flex;
+    align-items: center;
+    gap: .68rem;
+    margin: .8rem 0 1rem;
+    padding: .64rem .82rem;
+    border: 1px solid rgba(63, 109, 120, .18);
+    border: 1px solid color-mix(in srgb, var(--pmh-accent) 17%, var(--pmh-border));
+    border-radius: .78rem;
+    background: rgba(63, 109, 120, .045);
+    background: color-mix(in srgb, var(--pmh-accent) 4.5%, var(--pmh-card));
+    color: var(--pmh-heading);
+    box-shadow: 0 .18rem .55rem rgba(20, 50, 55, .04);
+}
+
+.pmh-contextual-help--compact {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    padding: .56rem .72rem;
+    box-shadow: none;
+}
+
+.pmh-contextual-help__icon {
+    display: inline-flex;
+    flex: 0 0 1.6rem;
+    align-items: center;
+    justify-content: center;
+    width: 1.6rem;
+    height: 1.6rem;
+    border: 1px solid rgba(63, 109, 120, .28);
+    border: 1px solid color-mix(in srgb, var(--pmh-accent) 30%, var(--pmh-border));
+    border-radius: 50%;
+    background: rgba(63, 109, 120, .10);
+    background: color-mix(in srgb, var(--pmh-accent) 10%, var(--pmh-card));
+    color: var(--pmh-accent-dark);
+    font-weight: 800;
+    line-height: 1;
+}
+
+.pmh-contextual-help__message {
+    flex: 1 1 auto;
+    min-width: 10rem;
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.pmh-contextual-help__link {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.15rem;
+    padding: .36rem .76rem;
+    border: 1px solid rgba(63, 109, 120, .34);
+    border: 1px solid color-mix(in srgb, var(--pmh-accent) 36%, var(--pmh-border));
+    border-radius: 999px;
+    background: var(--pmh-card);
+    color: var(--pmh-accent-dark) !important;
+    font-weight: 700;
+    line-height: 1.2;
+    text-decoration: none !important;
+}
+
+/* Keep contextual-help actions readable even when a theme applies its own
+   global link-hover colour or transparent button background. */
+html body .pmh-contextual-help > a.pmh-contextual-help__link:hover,
+html body .pmh-contextual-help > a.pmh-contextual-help__link:focus,
+html body .pmh-contextual-help > a.pmh-contextual-help__link:focus-visible {
+    border-color: rgba(63, 109, 120, .48) !important;
+    border-color: color-mix(in srgb, var(--pmh-accent) 46%, var(--pmh-border)) !important;
+    background-color: rgba(63, 109, 120, .10) !important;
+    background-color: color-mix(in srgb, var(--pmh-accent) 10%, var(--pmh-card)) !important;
+    background-image: none !important;
+    color: var(--pmh-accent-dark) !important;
+    opacity: 1 !important;
+    text-shadow: none !important;
+    box-shadow: 0 0 0 .18rem color-mix(in srgb, var(--pmh-accent) 11%, transparent) !important;
+}
+
+@media (max-width: 620px) {
+    .pmh-contextual-help {
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .pmh-contextual-help__message {
+        flex-basis: calc(100% - 2.4rem);
+    }
+
+    .pmh-contextual-help__link {
+        margin-left: 2.35rem;
+    }
+}

@@ -1,0 +1,105 @@
+<?php
+/** @var object $article */
+/** @var array<string,array{title:string,description:string,group:string}> $categories */
+/** @var \Illuminate\Support\Collection<int,object> $related */
+/** @var string $helpTitle */
+/** @var string $audience */
+/** @var string $actualAudience */
+/** @var string $audienceQuery */
+/** @var \Fisharebest\Webtrees\Tree $tree */
+/** @var string $moduleName */
+/** @var array<string,string> $moduleRequirements */
+/** @var bool $feedbackRecorded */
+$categoryTitle = $categories[$article->category]['title'] ?? $article->category;
+$requiredModules = trim((string) ($article->requires_modules ?? '')) === '' ? [] : array_values(array_filter(array_map('trim', explode(',', (string) $article->requires_modules))));
+$audienceParameters = $audienceQuery !== '' ? ['audience' => $audienceQuery] : [];
+$showRoute = static fn (array $parameters = []): string => route('module', array_merge([
+    'module' => $moduleName,
+    'action' => 'Show',
+    'tree' => $tree->name(),
+], $audienceParameters, $parameters));
+$articleRoute = static fn (string $slug): string => route('module', array_merge([
+    'module' => $moduleName,
+    'action' => 'Article',
+    'tree' => $tree->name(),
+    'slug' => $slug,
+], $audienceParameters));
+?>
+
+<div class="wt-page-content wt-member-help">
+    <?php if ($audienceQuery !== '') : ?>
+        <div class="alert alert-warning d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <span><?= e(\Fisharebest\Webtrees\I18N::translate('Administrator preview: you are viewing the %s help experience.', $audience === 'visitors' ? 'visitor' : 'member')) ?></span>
+            <a class="btn btn-sm btn-outline-secondary" href="<?= e(route('module', ['module' => $moduleName, 'action' => 'Show', 'tree' => $tree->name()])) ?>"><?= e(\Fisharebest\Webtrees\I18N::translate('Return to normal view')) ?></a>
+        </div>
+    <?php endif ?>
+
+    <nav class="pmh-breadcrumb" aria-label="<?= e(\Fisharebest\Webtrees\I18N::translate('Breadcrumb')) ?>">
+        <a href="<?= e($showRoute()) ?>"><?= e($helpTitle) ?></a>
+        <span aria-hidden="true">/</span>
+        <a href="<?= e($showRoute(['category' => $article->category])) ?>"><?= e($categoryTitle) ?></a>
+    </nav>
+
+    <div class="pmh-article-layout">
+        <article class="pmh-article-body">
+            <header>
+                <div class="pmh-card-meta">
+                    <span class="pmh-topic"><?= e($categoryTitle) ?></span>
+                    <?php foreach ($requiredModules as $requiredModule) : ?>
+                        <span class="pmh-feature-badge"><?= e($moduleRequirements[$requiredModule] ?? $requiredModule) ?></span>
+                    <?php endforeach ?>
+                </div>
+                <h1 class="pmh-article-title"><?= e($article->title) ?></h1>
+                <?php if ($article->summary !== '') : ?><p class="pmh-lead"><?= e($article->summary) ?></p><?php endif ?>
+            </header>
+            <div class="pmh-rich-text"><?= $article->body ?></div>
+
+            <section class="pmh-feedback" id="pmh-feedback" aria-labelledby="pmh-feedback-heading">
+                <?php if ($feedbackRecorded) : ?>
+                    <div class="pmh-feedback-thanks" role="status">
+                        <h2 id="pmh-feedback-heading"><?= e(\Fisharebest\Webtrees\I18N::translate('Thank you for your feedback')) ?></h2>
+                        <p><?= e(\Fisharebest\Webtrees\I18N::translate('Your response has been recorded and will help improve these instructions.')) ?></p>
+                    </div>
+                <?php elseif ($audienceQuery !== '') : ?>
+                    <div>
+                        <h2 id="pmh-feedback-heading"><?= e(\Fisharebest\Webtrees\I18N::translate('Was this helpful?')) ?></h2>
+                        <p><?= e(\Fisharebest\Webtrees\I18N::translate('Feedback is disabled while using an administrator preview.')) ?></p>
+                    </div>
+                <?php else : ?>
+                    <div>
+                        <h2 id="pmh-feedback-heading"><?= e(\Fisharebest\Webtrees\I18N::translate('Was this helpful?')) ?></h2>
+                        <p><?= e(\Fisharebest\Webtrees\I18N::translate('A quick response helps the administrator improve this guide.')) ?></p>
+                    </div>
+                    <form class="pmh-feedback-form" method="post" action="<?= e(route('module', ['module' => $moduleName, 'action' => 'Feedback', 'tree' => $tree->name()])) ?>">
+                        <?= csrf_field() ?>
+                        <input type="hidden" name="slug" value="<?= e($article->slug) ?>">
+                        <button class="btn btn-primary" type="submit" name="vote" value="yes"><?= e(\Fisharebest\Webtrees\I18N::translate('Yes')) ?></button>
+                        <button class="btn btn-outline-secondary" type="submit" name="vote" value="no"><?= e(\Fisharebest\Webtrees\I18N::translate('Not quite')) ?></button>
+                    </form>
+                <?php endif ?>
+            </section>
+        </article>
+
+        <aside class="pmh-sidebar">
+            <div class="pmh-side-card">
+                <h2><?= e(\Fisharebest\Webtrees\I18N::translate('Need more help?')) ?></h2>
+                <?php if ($audience === 'visitors') : ?>
+                    <p><?= e(\Fisharebest\Webtrees\I18N::translate('Contact the site administrator when you cannot find a relative, need access to private information or would like to provide a correction. Include the person’s name and enough detail to identify the record.')) ?></p>
+                <?php else : ?>
+                    <p><?= e(\Fisharebest\Webtrees\I18N::translate('When the instructions do not match what you can see, your editing permissions or active theme may be different. Contact the site administrator and include the person’s name and the task you are trying to complete.')) ?></p>
+                <?php endif ?>
+            </div>
+
+            <?php if ($related->isNotEmpty()) : ?>
+                <div class="pmh-side-card">
+                    <h2><?= e(\Fisharebest\Webtrees\I18N::translate('Related instructions')) ?></h2>
+                    <ul>
+                        <?php foreach ($related as $item) : ?>
+                            <li><a href="<?= e($articleRoute($item->slug)) ?>"><?= e($item->title) ?></a></li>
+                        <?php endforeach ?>
+                    </ul>
+                </div>
+            <?php endif ?>
+        </aside>
+    </div>
+</div>

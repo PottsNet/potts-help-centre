@@ -1,0 +1,108 @@
+<?php
+/** @var \Illuminate\Support\Collection<int,object> $articles */
+/** @var array<string,array{title:string,description:string,group:string}> $categories */
+/** @var string $category */
+/** @var string $query */
+/** @var string $eyebrow */
+/** @var string $intro */
+/** @var string $searchPlaceholder */
+/** @var string $audience */
+/** @var string $actualAudience */
+/** @var string $audienceQuery */
+/** @var \Fisharebest\Webtrees\Tree $tree */
+/** @var string $moduleName */
+/** @var array<string,string> $moduleRequirements */
+$audienceParameters = $audienceQuery !== '' ? ['audience' => $audienceQuery] : [];
+$showRoute = static fn (array $parameters = []): string => route('module', array_merge([
+    'module' => $moduleName,
+    'action' => 'Show',
+    'tree' => $tree->name(),
+], $audienceParameters, $parameters));
+$articleRoute = static fn (string $slug): string => route('module', array_merge([
+    'module' => $moduleName,
+    'action' => 'Article',
+    'tree' => $tree->name(),
+    'slug' => $slug,
+], $audienceParameters));
+?>
+
+<div class="wt-page-content wt-member-help">
+    <?php if ($audienceQuery !== '') : ?>
+        <div class="alert alert-warning d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <span><?= e(\Fisharebest\Webtrees\I18N::translate('Administrator preview: you are viewing the %s help experience.', $audience === 'visitors' ? 'visitor' : 'member')) ?></span>
+            <a class="btn btn-sm btn-outline-secondary" href="<?= e(route('module', ['module' => $moduleName, 'action' => 'Show', 'tree' => $tree->name()])) ?>"><?= e(\Fisharebest\Webtrees\I18N::translate('Return to normal view')) ?></a>
+        </div>
+    <?php endif ?>
+
+    <header class="pmh-hero">
+        <div>
+            <p class="pmh-eyebrow"><?= e($eyebrow) ?></p>
+            <h1 class="pmh-page-title"><?= e($title) ?></h1>
+            <p><?= e($intro) ?></p>
+        </div>
+
+        <form class="pmh-search" method="get" action="<?= e($showRoute()) ?>">
+            <?php if ($audienceQuery !== '') : ?><input type="hidden" name="audience" value="<?= e($audienceQuery) ?>"><?php endif ?>
+            <label class="visually-hidden" for="pmh-search"><?= e(\Fisharebest\Webtrees\I18N::translate('Search the help centre')) ?></label>
+            <input id="pmh-search" class="form-control" type="search" name="q" value="<?= e($query) ?>" placeholder="<?= e($searchPlaceholder) ?>">
+            <button class="btn btn-primary" type="submit"><?= e(\Fisharebest\Webtrees\I18N::translate('Search')) ?></button>
+        </form>
+    </header>
+
+    <?php if ($query === '' && $category === '') : ?>
+        <section aria-labelledby="pmh-categories-title">
+            <h2 id="pmh-categories-title"><?= e(\Fisharebest\Webtrees\I18N::translate('Browse by topic')) ?></h2>
+            <div class="pmh-category-grid">
+                <?php foreach ($categories as $key => $details) : ?>
+                    <a class="pmh-category-card" href="<?= e($showRoute(['category' => $key])) ?>">
+                        <span class="pmh-category-title"><?= e($details['title']) ?></span>
+                        <span><?= e($details['description']) ?></span>
+                    </a>
+                <?php endforeach ?>
+            </div>
+        </section>
+    <?php endif ?>
+
+    <section class="pmh-article-list" aria-labelledby="pmh-articles-title">
+        <div class="pmh-section-heading">
+            <div>
+                <h2 id="pmh-articles-title">
+                    <?php if ($query !== '') : ?>
+                        <?= e(\Fisharebest\Webtrees\I18N::translate('Search results')) ?>
+                    <?php elseif ($category !== '' && isset($categories[$category])) : ?>
+                        <?= e($categories[$category]['title']) ?>
+                    <?php else : ?>
+                        <?= e(\Fisharebest\Webtrees\I18N::translate('All help articles')) ?>
+                    <?php endif ?>
+                </h2>
+                <?php if ($query !== '') : ?>
+                    <p><?= e(\Fisharebest\Webtrees\I18N::translate('Results for “%s”', $query)) ?></p>
+                <?php endif ?>
+            </div>
+            <?php if ($query !== '' || $category !== '') : ?>
+                <a class="btn btn-outline-secondary" href="<?= e($showRoute()) ?>"><?= e(\Fisharebest\Webtrees\I18N::translate('Clear filter')) ?></a>
+            <?php endif ?>
+        </div>
+
+        <?php if ($articles->isEmpty()) : ?>
+            <div class="alert alert-info"><?= e(\Fisharebest\Webtrees\I18N::translate('No help articles matched your search. Try fewer words or browse a topic.')) ?></div>
+        <?php else : ?>
+            <div class="pmh-list-grid">
+                <?php foreach ($articles as $article) : ?>
+                    <article class="pmh-article-card">
+                        <div class="pmh-card-meta">
+                            <span class="pmh-topic"><?= e($categories[$article->category]['title'] ?? $article->category) ?></span>
+                            <?php $requiredModules = trim((string) ($article->requires_modules ?? '')) === '' ? [] : array_values(array_filter(array_map('trim', explode(',', (string) $article->requires_modules)))); ?>
+                            <?php foreach ($requiredModules as $requiredModule) : ?>
+                                <span class="pmh-feature-badge"><?= e($moduleRequirements[$requiredModule] ?? $requiredModule) ?></span>
+                            <?php endforeach ?>
+                        </div>
+                        <h3><a href="<?= e($articleRoute($article->slug)) ?>"><?= e($article->title) ?></a></h3>
+                        <p><?= e($article->summary) ?></p>
+                        <a class="pmh-read-link" href="<?= e($articleRoute($article->slug)) ?>"><?= e(\Fisharebest\Webtrees\I18N::translate('Read instructions')) ?></a>
+                    </article>
+                <?php endforeach ?>
+            </div>
+        <?php endif ?>
+    </section>
+</div>

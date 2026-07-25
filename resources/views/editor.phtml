@@ -1,0 +1,149 @@
+<?php
+/** @var object $article */
+/** @var array<string,array{title:string,description:string,group:string}> $categories */
+/** @var array<string,string> $audiences */
+/** @var \Fisharebest\Webtrees\Tree $tree */
+/** @var string $moduleName */
+/** @var array<string,string> $moduleRequirements */
+/** @var array<string,bool> $moduleStatus */
+/** @var bool $richTextEditorAvailable */
+$groupedCategories = ['visitors' => [], 'members' => []];
+foreach ($categories as $key => $details) {
+    $groupedCategories[$details['group'] ?? 'members'][$key] = $details;
+}
+$selectedModulesRaw = trim((string) ($article->requires_modules ?? ''));
+$selectedModules = $selectedModulesRaw === '' ? [] : array_values(array_filter(array_map('trim', explode(',', $selectedModulesRaw))));
+$previewAudience = $article->audience === 'visitors' ? 'visitors' : 'members';
+$previewUrl = $article->block_id > 0 && $article->published && trim((string) $article->slug) !== ''
+    ? route('module', [
+        'module' => $moduleName,
+        'action' => 'Article',
+        'tree' => $tree->name(),
+        'slug' => $article->slug,
+        'audience' => $previewAudience,
+    ])
+    : '';
+?>
+
+<?= view('components/breadcrumbs', ['links' => [
+    route(\Fisharebest\Webtrees\Http\RequestHandlers\ControlPanel::class) => \Fisharebest\Webtrees\I18N::translate('Control panel'),
+    route('module', ['module' => $moduleName, 'action' => 'Admin', 'tree' => $tree->name()]) => \Fisharebest\Webtrees\I18N::translate('POTTS Member Help Centre'),
+    $title,
+]]) ?>
+
+<h1><?= e($title) ?></h1>
+
+<form method="post" action="<?= e(route('module', ['module' => $moduleName, 'action' => 'AdminEdit', 'tree' => $tree->name(), 'block_id' => $article->block_id])) ?>">
+    <?= csrf_field() ?>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label" for="pmh-title"><?= e(\Fisharebest\Webtrees\I18N::translate('Article title')) ?></label>
+                        <input class="form-control" id="pmh-title" name="title" value="<?= e($article->title) ?>" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="pmh-summary"><?= e(\Fisharebest\Webtrees\I18N::translate('Short summary')) ?></label>
+                        <textarea class="form-control" id="pmh-summary" name="summary" rows="3"><?= e($article->summary) ?></textarea>
+                        <div class="form-text"><?= e(\Fisharebest\Webtrees\I18N::translate('Shown on search results and article cards.')) ?></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+                            <label class="form-label mb-0" for="pmh-body"><?= e(\Fisharebest\Webtrees\I18N::translate('Instructions')) ?></label>
+                            <?php if ($richTextEditorAvailable) : ?>
+                                <span class="badge text-bg-success"><?= e(\Fisharebest\Webtrees\I18N::translate('Rich-text editor active')) ?></span>
+                            <?php else : ?>
+                                <span class="badge text-bg-warning"><?= e(\Fisharebest\Webtrees\I18N::translate('Plain HTML editor')) ?></span>
+                            <?php endif ?>
+                        </div>
+
+                        <?php if (!$richTextEditorAvailable) : ?>
+                            <div class="alert alert-warning py-2">
+                                <?= e(\Fisharebest\Webtrees\I18N::translate('Enable the webtrees CKEditor module to use the visual editing toolbar. The plain HTML field remains available as a fallback.')) ?>
+                            </div>
+                        <?php endif ?>
+
+                        <textarea class="form-control html-edit pmh-html-edit" id="pmh-body" name="body" rows="24"><?= e($article->body) ?></textarea>
+                        <div class="form-text">
+                            <?= e(\Fisharebest\Webtrees\I18N::translate('Use the toolbar for headings, bold text, numbered steps, bullet lists, links, tables and images. Use Source when you need to inspect or adjust the HTML. Content is sanitised when saved.')) ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label" for="pmh-audience"><?= e(\Fisharebest\Webtrees\I18N::translate('Audience')) ?></label>
+                        <select class="form-select" id="pmh-audience" name="audience">
+                            <?php foreach ($audiences as $key => $label) : ?>
+                                <option value="<?= e($key) ?>" <?= $article->audience === $key ? 'selected' : '' ?>><?= e($label) ?></option>
+                            <?php endforeach ?>
+                        </select>
+                        <div class="form-text"><?= e(\Fisharebest\Webtrees\I18N::translate('Visitors are not signed in. Registered members have membership access to this family tree. Everyone is shown in both help centres.')) ?></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="pmh-category"><?= e(\Fisharebest\Webtrees\I18N::translate('Category')) ?></label>
+                        <select class="form-select" id="pmh-category" name="category">
+                            <optgroup label="<?= e(\Fisharebest\Webtrees\I18N::translate('Visitor topics')) ?>">
+                                <?php foreach ($groupedCategories['visitors'] as $key => $details) : ?>
+                                    <option value="<?= e($key) ?>" <?= $article->category === $key ? 'selected' : '' ?>><?= e($details['title']) ?></option>
+                                <?php endforeach ?>
+                            </optgroup>
+                            <optgroup label="<?= e(\Fisharebest\Webtrees\I18N::translate('Member topics')) ?>">
+                                <?php foreach ($groupedCategories['members'] as $key => $details) : ?>
+                                    <option value="<?= e($key) ?>" <?= $article->category === $key ? 'selected' : '' ?>><?= e($details['title']) ?></option>
+                                <?php endforeach ?>
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <fieldset class="mb-3">
+                        <legend class="form-label mb-2"><?= e(\Fisharebest\Webtrees\I18N::translate('Required optional modules')) ?></legend>
+                        <div class="border rounded p-3">
+                            <?php foreach ($moduleRequirements as $requiredModule => $label) : ?>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" id="pmh-module-<?= e(md5($requiredModule)) ?>" type="checkbox" name="requires_modules[]" value="<?= e($requiredModule) ?>" <?= in_array($requiredModule, $selectedModules, true) ? 'checked' : '' ?>>
+                                    <label class="form-check-label" for="pmh-module-<?= e(md5($requiredModule)) ?>">
+                                        <?= e($label) ?>
+                                        <span class="badge <?= ($moduleStatus[$requiredModule] ?? false) ? 'text-bg-success' : 'text-bg-secondary' ?>"><?= e(($moduleStatus[$requiredModule] ?? false) ? \Fisharebest\Webtrees\I18N::translate('Active') : \Fisharebest\Webtrees\I18N::translate('Not active')) ?></span>
+                                    </label>
+                                </div>
+                            <?php endforeach ?>
+                        </div>
+                        <div class="form-text"><?= e(\Fisharebest\Webtrees\I18N::translate('Leave all unchecked for core webtrees help. When one or more modules are selected, the article is displayed only while every selected module is active.')) ?></div>
+                    </fieldset>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="pmh-slug"><?= e(\Fisharebest\Webtrees\I18N::translate('Link name')) ?></label>
+                        <input class="form-control" id="pmh-slug" name="slug" value="<?= e($article->slug) ?>" placeholder="add-a-partner">
+                        <div class="form-text"><?= e(\Fisharebest\Webtrees\I18N::translate('Leave blank to generate it from the title.')) ?></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="pmh-order"><?= e(\Fisharebest\Webtrees\I18N::translate('Display order')) ?></label>
+                        <input class="form-control" id="pmh-order" type="number" min="1" name="block_order" value="<?= e((string) $article->block_order) ?>">
+                    </div>
+
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" id="pmh-published" type="checkbox" name="published" value="1" <?= $article->published ? 'checked' : '' ?>>
+                        <label class="form-check-label" for="pmh-published"><?= e(\Fisharebest\Webtrees\I18N::translate('Published')) ?></label>
+                    </div>
+
+                    <button class="btn btn-primary w-100" type="submit"><?= e(\Fisharebest\Webtrees\I18N::translate('Save')) ?></button>
+                    <?php if ($previewUrl !== '') : ?>
+                        <a class="btn btn-outline-secondary w-100 mt-2" href="<?= e($previewUrl) ?>" target="_blank" rel="noopener"><?= e(\Fisharebest\Webtrees\I18N::translate('View saved article')) ?></a>
+                    <?php endif ?>
+                    <a class="btn btn-link w-100 mt-2" href="<?= e(route('module', ['module' => $moduleName, 'action' => 'Admin', 'tree' => $tree->name()])) ?>"><?= e(\Fisharebest\Webtrees\I18N::translate('Cancel')) ?></a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
