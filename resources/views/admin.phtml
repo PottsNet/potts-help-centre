@@ -9,6 +9,8 @@
 /** @var array<string,string> $moduleRequirements */
 /** @var array<string,bool> $moduleStatus */
 /** @var array{yes:int,no:int} $feedbackTotals */
+/** @var array{total:int,published:int,drafts:int,visitors:int,members:int,everyone:int,featured:int,screenshots:int,helpful_rate:int|null} $dashboard */
+/** @var \Illuminate\Support\Collection<int,object> $attentionArticles */
 /** @var array{enabled:bool,visitors:bool,members:bool,individual:bool,family:bool,forms:bool,new_tab:bool} $contextualSettings */
 $requirementsFor = static function (object $article): array {
     $raw = trim((string) ($article->requires_modules ?? ''));
@@ -18,7 +20,13 @@ $requirementsFor = static function (object $article): array {
 
 <?= view('components/breadcrumbs', ['links' => [route(\Fisharebest\Webtrees\Http\RequestHandlers\ControlPanel::class) => \Fisharebest\Webtrees\I18N::translate('Control panel'), $title]]) ?>
 
-<h1><?= e($title) ?></h1>
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+    <div>
+        <h1 class="mb-1"><?= e($title) ?></h1>
+        <p class="text-muted mb-0"><?= e(\Fisharebest\Webtrees\I18N::translate('Manage one inclusive help centre with different guidance for visitors and registered members.')) ?></p>
+    </div>
+    <span class="badge text-bg-secondary fs-6"><?= e(\Fisharebest\Webtrees\I18N::translate('Version')) ?> <?= e($version) ?></span>
+</div>
 
 <div class="card mb-4">
     <div class="card-body">
@@ -37,6 +45,39 @@ $requirementsFor = static function (object $article): array {
     </div>
 </div>
 
+<section class="pmh-admin-dashboard mb-4" aria-label="<?= e(\Fisharebest\Webtrees\I18N::translate('Help centre summary')) ?>">
+    <div class="pmh-admin-stat">
+        <span><?= e(\Fisharebest\Webtrees\I18N::translate('Articles')) ?></span>
+        <strong><?= e((string) $dashboard['total']) ?></strong>
+        <small><?= e(\Fisharebest\Webtrees\I18N::translate('%s published, %s drafts', (string) $dashboard['published'], (string) $dashboard['drafts'])) ?></small>
+    </div>
+    <div class="pmh-admin-stat">
+        <span><?= e(\Fisharebest\Webtrees\I18N::translate('Visitor guides')) ?></span>
+        <strong><?= e((string) $dashboard['visitors']) ?></strong>
+        <small><?= e(\Fisharebest\Webtrees\I18N::translate('Shown while signed out')) ?></small>
+    </div>
+    <div class="pmh-admin-stat">
+        <span><?= e(\Fisharebest\Webtrees\I18N::translate('Member guides')) ?></span>
+        <strong><?= e((string) $dashboard['members']) ?></strong>
+        <small><?= e(\Fisharebest\Webtrees\I18N::translate('%s shared with everyone', (string) $dashboard['everyone'])) ?></small>
+    </div>
+    <div class="pmh-admin-stat">
+        <span><?= e(\Fisharebest\Webtrees\I18N::translate('Quick help')) ?></span>
+        <strong><?= e((string) $dashboard['featured']) ?></strong>
+        <small><?= e(\Fisharebest\Webtrees\I18N::translate('Administrator-selected features')) ?></small>
+    </div>
+    <div class="pmh-admin-stat">
+        <span><?= e(\Fisharebest\Webtrees\I18N::translate('Illustrated guides')) ?></span>
+        <strong><?= e((string) $dashboard['screenshots']) ?></strong>
+        <small><?= e(\Fisharebest\Webtrees\I18N::translate('Articles with a screenshot')) ?></small>
+    </div>
+    <div class="pmh-admin-stat">
+        <span><?= e(\Fisharebest\Webtrees\I18N::translate('Helpful rating')) ?></span>
+        <strong><?= $dashboard['helpful_rate'] === null ? '—' : e((string) $dashboard['helpful_rate']) . '%' ?></strong>
+        <small><?= e(\Fisharebest\Webtrees\I18N::translate('%s responses', (string) ($feedbackTotals['yes'] + $feedbackTotals['no']))) ?></small>
+    </div>
+</section>
+
 <div class="card mb-4">
     <div class="card-body">
         <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
@@ -51,123 +92,132 @@ $requirementsFor = static function (object $article): array {
         <form method="post" action="<?= e(route('module', ['module' => $moduleName, 'action' => 'AdminContext', 'tree' => $tree->name()])) ?>">
             <?= csrf_field() ?>
             <div class="row g-3">
-                <div class="col-md-6 col-xl-4">
-                    <div class="form-check">
-                        <input class="form-check-input" id="pmh-context-enabled" type="checkbox" name="enabled" value="1" <?= $contextualSettings['enabled'] ? 'checked' : '' ?>>
-                        <label class="form-check-label fw-semibold" for="pmh-context-enabled"><?= e(\Fisharebest\Webtrees\I18N::translate('Enable contextual help')) ?></label>
+                <?php foreach ([
+                    'enabled' => \Fisharebest\Webtrees\I18N::translate('Enable contextual help'),
+                    'visitors' => \Fisharebest\Webtrees\I18N::translate('Show to visitors'),
+                    'members' => \Fisharebest\Webtrees\I18N::translate('Show to registered members'),
+                    'individual' => \Fisharebest\Webtrees\I18N::translate('Individual pages and tabs'),
+                    'family' => \Fisharebest\Webtrees\I18N::translate('Family pages'),
+                    'forms' => \Fisharebest\Webtrees\I18N::translate('Editing forms and dialogs'),
+                    'new_tab' => \Fisharebest\Webtrees\I18N::translate('Open guides in a new tab'),
+                ] as $key => $label) : ?>
+                    <div class="col-md-6 col-xl-4">
+                        <div class="form-check">
+                            <input class="form-check-input" id="pmh-context-<?= e(str_replace('_', '-', $key)) ?>" type="checkbox" name="<?= e($key) ?>" value="1" <?= $contextualSettings[$key] ? 'checked' : '' ?>>
+                            <label class="form-check-label <?= $key === 'enabled' ? 'fw-semibold' : '' ?>" for="pmh-context-<?= e(str_replace('_', '-', $key)) ?>"><?= e($label) ?></label>
+                        </div>
                     </div>
-                </div>
-                <div class="col-md-6 col-xl-4">
-                    <div class="form-check">
-                        <input class="form-check-input" id="pmh-context-visitors" type="checkbox" name="visitors" value="1" <?= $contextualSettings['visitors'] ? 'checked' : '' ?>>
-                        <label class="form-check-label" for="pmh-context-visitors"><?= e(\Fisharebest\Webtrees\I18N::translate('Show to visitors')) ?></label>
-                    </div>
-                </div>
-                <div class="col-md-6 col-xl-4">
-                    <div class="form-check">
-                        <input class="form-check-input" id="pmh-context-members" type="checkbox" name="members" value="1" <?= $contextualSettings['members'] ? 'checked' : '' ?>>
-                        <label class="form-check-label" for="pmh-context-members"><?= e(\Fisharebest\Webtrees\I18N::translate('Show to registered members')) ?></label>
-                    </div>
-                </div>
-                <div class="col-md-6 col-xl-4">
-                    <div class="form-check">
-                        <input class="form-check-input" id="pmh-context-individual" type="checkbox" name="individual" value="1" <?= $contextualSettings['individual'] ? 'checked' : '' ?>>
-                        <label class="form-check-label" for="pmh-context-individual"><?= e(\Fisharebest\Webtrees\I18N::translate('Individual pages and tabs')) ?></label>
-                    </div>
-                </div>
-                <div class="col-md-6 col-xl-4">
-                    <div class="form-check">
-                        <input class="form-check-input" id="pmh-context-family" type="checkbox" name="family" value="1" <?= $contextualSettings['family'] ? 'checked' : '' ?>>
-                        <label class="form-check-label" for="pmh-context-family"><?= e(\Fisharebest\Webtrees\I18N::translate('Family pages')) ?></label>
-                    </div>
-                </div>
-                <div class="col-md-6 col-xl-4">
-                    <div class="form-check">
-                        <input class="form-check-input" id="pmh-context-forms" type="checkbox" name="forms" value="1" <?= $contextualSettings['forms'] ? 'checked' : '' ?>>
-                        <label class="form-check-label" for="pmh-context-forms"><?= e(\Fisharebest\Webtrees\I18N::translate('Editing forms and dialogs')) ?></label>
-                    </div>
-                </div>
-                <div class="col-md-6 col-xl-4">
-                    <div class="form-check">
-                        <input class="form-check-input" id="pmh-context-new-tab" type="checkbox" name="new_tab" value="1" <?= $contextualSettings['new_tab'] ? 'checked' : '' ?>>
-                        <label class="form-check-label" for="pmh-context-new-tab"><?= e(\Fisharebest\Webtrees\I18N::translate('Open guides in a new tab')) ?></label>
-                    </div>
-                </div>
+                <?php endforeach ?>
             </div>
             <button class="btn btn-primary mt-3" type="submit"><?= e(\Fisharebest\Webtrees\I18N::translate('Save contextual help settings')) ?></button>
         </form>
     </div>
 </div>
 
-<div class="card mb-4">
-    <div class="card-body">
-        <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
-            <div>
-                <h2 class="h5 mb-2"><?= e(\Fisharebest\Webtrees\I18N::translate('Starter guide updates')) ?></h2>
-                <p class="mb-2"><?= e(\Fisharebest\Webtrees\I18N::translate('This release includes a substantially expanded webtrees guide and help for supported Potts modules.')) ?></p>
-                <p class="text-muted small mb-0"><?= e(\Fisharebest\Webtrees\I18N::translate('Adding missing articles is non-destructive. Replacing starter articles updates every bundled article with a matching link name, so edits made directly to those starter articles will be overwritten. Custom articles with other link names are preserved.')) ?></p>
-            </div>
-            <div class="d-flex flex-wrap gap-2">
-                <?php if ($missingDefaults > 0) : ?>
-                    <form method="post" action="<?= e(route('module', ['module' => $moduleName, 'action' => 'AdminSeed', 'tree' => $tree->name()])) ?>">
-                        <?= csrf_field() ?>
-                        <button class="btn btn-outline-primary" type="submit"><?= e(\Fisharebest\Webtrees\I18N::translate('Add %s missing articles', (string) $missingDefaults)) ?></button>
-                    </form>
-                <?php endif ?>
-                <form method="post" action="<?= e(route('module', ['module' => $moduleName, 'action' => 'AdminRefresh', 'tree' => $tree->name()])) ?>" onsubmit="return confirm('<?= e(\Fisharebest\Webtrees\I18N::translate('Replace all bundled starter articles with the latest versions? Any edits made to articles with the same link names will be overwritten.')) ?>');">
-                    <?= csrf_field() ?>
-                    <button class="btn btn-primary" type="submit"><?= e(\Fisharebest\Webtrees\I18N::translate('Replace starter articles with latest guide')) ?></button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="card mb-4">
-    <div class="card-body">
-        <h2 class="h5 mb-3"><?= e(\Fisharebest\Webtrees\I18N::translate('Module-aware help')) ?></h2>
-        <p class="text-muted"><?= e(\Fisharebest\Webtrees\I18N::translate('Articles linked to an optional module are shown only while that module is active. The core webtrees guide is always available.')) ?></p>
-        <div class="pmh-module-status-grid">
-            <?php foreach ($moduleRequirements as $requiredModule => $label) : ?>
-                <div class="pmh-module-status">
-                    <span class="pmh-status-dot <?= ($moduleStatus[$requiredModule] ?? false) ? 'is-active' : 'is-inactive' ?>" aria-hidden="true"></span>
-                    <span><?= e($label) ?></span>
-                    <span class="badge <?= ($moduleStatus[$requiredModule] ?? false) ? 'text-bg-success' : 'text-bg-secondary' ?>"><?= e(($moduleStatus[$requiredModule] ?? false) ? \Fisharebest\Webtrees\I18N::translate('Active') : \Fisharebest\Webtrees\I18N::translate('Not active')) ?></span>
+<div class="row g-4 mb-4">
+    <div class="col-xl-7">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+                    <div>
+                        <h2 class="h5 mb-2"><?= e(\Fisharebest\Webtrees\I18N::translate('Starter guide updates')) ?></h2>
+                        <p class="mb-2"><?= e(\Fisharebest\Webtrees\I18N::translate('Install newly bundled articles or refresh the complete starter guide.')) ?></p>
+                        <p class="text-muted small mb-0"><?= e(\Fisharebest\Webtrees\I18N::translate('Adding missing articles is non-destructive. Replacing starter articles overwrites edits made to bundled articles with matching link names. Custom articles with other link names are preserved.')) ?></p>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <?php if ($missingDefaults > 0) : ?>
+                            <form method="post" action="<?= e(route('module', ['module' => $moduleName, 'action' => 'AdminSeed', 'tree' => $tree->name()])) ?>">
+                                <?= csrf_field() ?>
+                                <button class="btn btn-outline-primary" type="submit"><?= e(\Fisharebest\Webtrees\I18N::translate('Add %s missing articles', (string) $missingDefaults)) ?></button>
+                            </form>
+                        <?php endif ?>
+                        <form method="post" action="<?= e(route('module', ['module' => $moduleName, 'action' => 'AdminRefresh', 'tree' => $tree->name()])) ?>" onsubmit="return confirm('<?= e(\Fisharebest\Webtrees\I18N::translate('Replace all bundled starter articles with the latest versions? Any edits made to articles with the same link names will be overwritten.')) ?>');">
+                            <?= csrf_field() ?>
+                            <button class="btn btn-primary" type="submit"><?= e(\Fisharebest\Webtrees\I18N::translate('Refresh starter guide')) ?></button>
+                        </form>
+                    </div>
                 </div>
-            <?php endforeach ?>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-5">
+        <div class="card h-100">
+            <div class="card-body">
+                <h2 class="h5 mb-3"><?= e(\Fisharebest\Webtrees\I18N::translate('Module-aware help')) ?></h2>
+                <div class="pmh-module-status-grid">
+                    <?php foreach ($moduleRequirements as $requiredModule => $label) : ?>
+                        <div class="pmh-module-status">
+                            <span class="pmh-status-dot <?= ($moduleStatus[$requiredModule] ?? false) ? 'is-active' : 'is-inactive' ?>" aria-hidden="true"></span>
+                            <span><?= e($label) ?></span>
+                            <span class="badge <?= ($moduleStatus[$requiredModule] ?? false) ? 'text-bg-success' : 'text-bg-secondary' ?>"><?= e(($moduleStatus[$requiredModule] ?? false) ? \Fisharebest\Webtrees\I18N::translate('Active') : \Fisharebest\Webtrees\I18N::translate('Not active')) ?></span>
+                        </div>
+                    <?php endforeach ?>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
-<div class="card mb-4">
-    <div class="card-body">
-        <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
-            <div>
-                <h2 class="h5 mb-1"><?= e(\Fisharebest\Webtrees\I18N::translate('Was this helpful? feedback')) ?></h2>
-                <p class="text-muted mb-0"><?= e(\Fisharebest\Webtrees\I18N::translate('The module stores aggregate responses only. It does not record names, email addresses or comments.')) ?></p>
-            </div>
-            <div class="d-flex flex-wrap gap-2">
-                <span class="badge text-bg-success fs-6"><?= e(\Fisharebest\Webtrees\I18N::translate('Helpful')) ?>: <?= e((string) $feedbackTotals['yes']) ?></span>
-                <span class="badge text-bg-secondary fs-6"><?= e(\Fisharebest\Webtrees\I18N::translate('Not helpful')) ?>: <?= e((string) $feedbackTotals['no']) ?></span>
+<?php if ($attentionArticles->isNotEmpty()) : ?>
+    <div class="card mb-4 border-warning">
+        <div class="card-body">
+            <h2 class="h5 mb-2"><?= e(\Fisharebest\Webtrees\I18N::translate('Articles to review')) ?></h2>
+            <p class="text-muted"><?= e(\Fisharebest\Webtrees\I18N::translate('These articles have at least two responses and the highest proportion of “Not quite” ratings.')) ?></p>
+            <div class="list-group list-group-flush">
+                <?php foreach ($attentionArticles as $attentionArticle) : ?>
+                    <?php $yes = (int) ($attentionArticle->feedback_yes ?? 0); $no = (int) ($attentionArticle->feedback_no ?? 0); $total = $yes + $no; ?>
+                    <a class="list-group-item list-group-item-action d-flex flex-wrap justify-content-between align-items-center gap-2" href="<?= e(route('module', ['module' => $moduleName, 'action' => 'AdminEdit', 'tree' => $tree->name(), 'block_id' => $attentionArticle->block_id])) ?>">
+                        <span><strong><?= e($attentionArticle->title) ?></strong><br><small class="text-muted"><?= e($attentionArticle->summary) ?></small></span>
+                        <span class="badge text-bg-warning"><?= e((string) $no) ?> <?= e(\Fisharebest\Webtrees\I18N::translate('Not quite')) ?> / <?= e((string) $total) ?></span>
+                    </a>
+                <?php endforeach ?>
             </div>
         </div>
     </div>
-</div>
+<?php endif ?>
 
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
     <div>
         <h2 class="h4 mb-1"><?= e(\Fisharebest\Webtrees\I18N::translate('Help articles')) ?></h2>
-        <p class="text-muted mb-0"><?= e(\Fisharebest\Webtrees\I18N::translate('Choose the audience and optional module requirements for each article. The help experience changes automatically after sign-in.')) ?></p>
+        <p class="text-muted mb-0"><?= e(\Fisharebest\Webtrees\I18N::translate('Choose the audience, Quick help status and optional module requirements for each article.')) ?></p>
     </div>
     <div class="d-flex flex-wrap gap-2">
-        <a class="btn btn-outline-secondary" target="_blank" rel="noopener" href="<?= e(route('module', ['module' => $moduleName, 'action' => 'Show', 'tree' => $tree->name(), 'audience' => 'visitors'])) ?>"><?= e(\Fisharebest\Webtrees\I18N::translate('Preview visitor help')) ?></a>
-        <a class="btn btn-outline-secondary" target="_blank" rel="noopener" href="<?= e(route('module', ['module' => $moduleName, 'action' => 'Show', 'tree' => $tree->name(), 'audience' => 'members'])) ?>"><?= e(\Fisharebest\Webtrees\I18N::translate('Preview member help')) ?></a>
+        <a class="btn btn-outline-secondary" target="_blank" rel="noopener noreferrer" href="<?= e(route('module', ['module' => $moduleName, 'action' => 'Show', 'tree' => $tree->name(), 'audience' => 'visitors'])) ?>"><?= e(\Fisharebest\Webtrees\I18N::translate('Preview visitor view')) ?></a>
+        <a class="btn btn-outline-secondary" target="_blank" rel="noopener noreferrer" href="<?= e(route('module', ['module' => $moduleName, 'action' => 'Show', 'tree' => $tree->name(), 'audience' => 'members'])) ?>"><?= e(\Fisharebest\Webtrees\I18N::translate('Preview member view')) ?></a>
         <a class="btn btn-primary" href="<?= e(route('module', ['module' => $moduleName, 'action' => 'AdminEdit', 'tree' => $tree->name()])) ?>"><?= e(\Fisharebest\Webtrees\I18N::translate('Add help article')) ?></a>
     </div>
 </div>
 
+<div class="card mb-3 pmh-admin-filters" data-pmh-admin-filters>
+    <div class="card-body row g-3 align-items-end">
+        <div class="col-lg-6">
+            <label class="form-label" for="pmh-admin-search"><?= e(\Fisharebest\Webtrees\I18N::translate('Find an article')) ?></label>
+            <input class="form-control" id="pmh-admin-search" type="search" placeholder="<?= e(\Fisharebest\Webtrees\I18N::translate('Search title, summary or category')) ?>" data-pmh-admin-search>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <label class="form-label" for="pmh-admin-audience"><?= e(\Fisharebest\Webtrees\I18N::translate('Audience')) ?></label>
+            <select class="form-select" id="pmh-admin-audience" data-pmh-admin-audience>
+                <option value=""><?= e(\Fisharebest\Webtrees\I18N::translate('All audiences')) ?></option>
+                <?php foreach ($audiences as $key => $label) : ?><option value="<?= e($key) ?>"><?= e($label) ?></option><?php endforeach ?>
+            </select>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <label class="form-label" for="pmh-admin-status"><?= e(\Fisharebest\Webtrees\I18N::translate('Status')) ?></label>
+            <select class="form-select" id="pmh-admin-status" data-pmh-admin-status>
+                <option value=""><?= e(\Fisharebest\Webtrees\I18N::translate('All statuses')) ?></option>
+                <option value="published"><?= e(\Fisharebest\Webtrees\I18N::translate('Published')) ?></option>
+                <option value="draft"><?= e(\Fisharebest\Webtrees\I18N::translate('Draft')) ?></option>
+                <option value="featured"><?= e(\Fisharebest\Webtrees\I18N::translate('Quick help')) ?></option>
+                <option value="illustrated"><?= e(\Fisharebest\Webtrees\I18N::translate('Has screenshot')) ?></option>
+                <option value="no-screenshot"><?= e(\Fisharebest\Webtrees\I18N::translate('Needs screenshot')) ?></option>
+            </select>
+        </div>
+        <div class="col-12"><p class="text-muted small mb-0" data-pmh-admin-count></p></div>
+    </div>
+</div>
+
 <div class="table-responsive">
-    <table class="table table-bordered table-striped align-middle">
+    <table class="table table-bordered table-striped align-middle" data-pmh-admin-table>
         <thead>
             <tr>
                 <th><?= e(\Fisharebest\Webtrees\I18N::translate('Order')) ?></th>
@@ -182,11 +232,15 @@ $requirementsFor = static function (object $article): array {
         </thead>
         <tbody>
             <?php foreach ($articles as $article) : ?>
-                <?php $requirements = $requirementsFor($article); ?>
-                <tr>
+                <?php $requirements = $requirementsFor($article); $isFeatured = (bool) ($article->featured ?? false); ?>
+                <tr data-pmh-admin-row data-search="<?= e(mb_strtolower($article->title . ' ' . $article->summary . ' ' . ($categories[$article->category]['title'] ?? $article->category))) ?>" data-audience="<?= e($article->audience) ?>" data-status="<?= e($article->published ? 'published' : 'draft') ?>" data-featured="<?= $isFeatured ? '1' : '0' ?>" data-screenshot="<?= trim((string) ($article->screenshot ?? '')) !== '' ? '1' : '0' ?>">
                     <td><?= e((string) $article->block_order) ?></td>
                     <td>
-                        <strong><?= e($article->title) ?></strong><br>
+                        <div class="d-flex flex-wrap align-items-center gap-2">
+                            <strong><?= e($article->title) ?></strong>
+                            <?php if ($isFeatured) : ?><span class="badge text-bg-primary"><?= e(\Fisharebest\Webtrees\I18N::translate('Quick help')) ?></span><?php endif ?>
+                            <?php if (trim((string) ($article->screenshot ?? '')) !== '') : ?><span class="badge text-bg-info"><?= e(\Fisharebest\Webtrees\I18N::translate('Screenshot')) ?></span><?php endif ?>
+                        </div>
                         <span class="text-muted small"><?= e($article->summary) ?></span>
                     </td>
                     <td><span class="badge text-bg-secondary"><?= e($audiences[$article->audience] ?? $article->audience) ?></span></td>
@@ -221,6 +275,5 @@ $requirementsFor = static function (object $article): array {
 </div>
 
 <div class="alert alert-light border mt-4">
-    <strong><?= e(\Fisharebest\Webtrees\I18N::translate('Version')) ?>:</strong> <?= e($version) ?>.
-    <?= e(\Fisharebest\Webtrees\I18N::translate('Visitor and member content is stored together using webtrees’ existing block storage, so no database migration is required.')) ?>
+    <?= e(\Fisharebest\Webtrees\I18N::translate('The existing module folder and storage identity remain potts_member_help, so this renamed release retains all saved articles, settings and feedback without a database migration.')) ?>
 </div>

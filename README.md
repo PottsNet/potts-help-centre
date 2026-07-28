@@ -1,128 +1,152 @@
-# POTTS Member Help Centre
+# Potts Help Centre
 
-POTTS Member Help Centre is a standalone custom module for webtrees 2.2.x. It provides a searchable, tree-specific guide for visitors and registered members, with detailed instructions written specifically for webtrees and optional Potts modules.
+[![Quality checks](https://github.com/PottsNet/potts-help-centre/actions/workflows/quality.yml/badge.svg)](https://github.com/PottsNet/potts-help-centre/actions/workflows/quality.yml)
 
-## Version 0.4.0-alpha.4
+Potts Help Centre is a custom module for webtrees 2.2.x. It provides one inclusive, tree-specific help centre for signed-out visitors and registered members while automatically showing each audience the guidance relevant to them.
 
-This is an alpha pre-release for public testing. It is feature-complete enough for GitHub publication but should remain marked as a pre-release until it has been checked on a clean webtrees installation and at least one standard theme.
+The public menu uses the compact label **Help**. The landing page identifies the current experience as **Visitor Help Centre** or **Member Help Centre**.
 
-This build gives contextual help a quieter, theme-aware presentation. It follows every Potts Modern colour preset through the theme’s design variables and retains Bootstrap and fixed fallbacks for standard webtrees themes.
+## Version 1.0.0-rc.1
 
-### Added or fixed in this build
+This is the first release candidate for Potts Help Centre 1.0.0. It retains the existing `potts_member_help` folder, PHP namespace, module identity and database storage so upgrades preserve saved articles, settings and feedback.
 
-- quieter contextual help that follows all Potts Modern colour presets automatically
-- softened background, border, icon, shadow and action-button treatments
-- high-contrast contextual guide-link hover and keyboard-focus styling
-- theme-resistant background, border and text colours scoped only to contextual help actions
-- contextual help beneath the active tab on individual pages
-- separate guidance for Biography, Facts and events, Families, Media and other individual-page tabs
-- contextual guidance on family pages
-- task-specific links inside webtrees editing dialogs and full-page forms
-- recognised tasks including creating people, adding partners, children or parents, editing names, adding facts and events, adding media and adding sources or citations
-- module-aware links for close-relative events, relationship options and historical context
-- per-tree administration settings for visitors, members, individual pages, family pages and editing forms
-- guides open in a new tab by default so partially completed editing forms remain intact
+### Highlights
 
-### Included
+- separate visitor, member and shared guidance within one inclusive Help Centre
+- audience-specific **Quick help** cards for common tasks
+- ranked multi-word search across titles, summaries, categories and article content
+- topic browsing, article counts and an optional complete article list
+- reading time, generated table of contents, print and copy-link actions
+- previous, next and related-article navigation
+- contextual help beside supported individual pages, family pages and editing forms
+- administrator-editable articles with rich-text and plain-HTML editing modes
+- publication, audience, Quick help, module requirement and ordering controls
+- aggregate helpfulness feedback and an **Articles to review** panel
+- optional article screenshots with captions, alternative text and source attribution
+- twelve bundled illustrated guides using official webtrees material or fictional records
+- automatic notice that screens may vary by theme, permissions and enabled modules
+- theme-aware layouts tested for Potts Modern and designed for standard webtrees themes
+- non-destructive upgrade behaviour for existing Potts Member Help installations
 
-- 71 editable starter articles
-- 26 visitor articles, 42 member articles and 3 articles available to everyone
-- 17 visitor and member categories
-- webtrees-specific guidance for searching, individual pages, charts, privacy and accounts
-- clear explanations of the Biography, Facts and events and Families tabs
-- step-by-step member instructions for people, relationships, facts, events, media, sources and research notes
-- module-aware help for:
-  - Potts Biography
-  - Potts Relationship Context
-  - Potts Historical Facts
-  - Potts Fact Ages
-  - Potts Modern Theme, available as an article requirement for custom content
-- automatic hiding of module-specific articles when the required module is not active
-- an optional-module selector in the article editor
-- module status indicators in administration
-- a safe action to add only missing starter articles
-- a separate action to replace the bundled starter set with the latest guide while preserving custom articles with other link names
+## Included guidance
+
+The bundled starter guide contains 71 editable articles:
+
+- 26 visitor articles
+- 42 member articles
+- 3 articles available to everyone
+- 17 visitor and member topic categories
+
+Guidance covers searching, individual pages, charts, privacy, accounts, people, relationships, facts, events, names, media, sources, research notes and responsible contribution.
+
+## Screenshots
+
+The bundled illustrations provide visual orientation without relying on private family data. Written instructions remain complete because the wording, position and availability of controls can vary between installations.
+
+<table>
+<tr>
+<td width="50%"><img src="resources/screenshots/quick-search-guide.webp" alt="Illustrated quick-search guide using fictional family information"><br><strong>Find a person</strong></td>
+<td width="50%"><img src="resources/screenshots/add-partner-guide.webp" alt="Illustrated guide showing where to add a partner"><br><strong>Add a partner</strong></td>
+</tr>
+<tr>
+<td width="50%"><img src="resources/screenshots/media-upload-guide.webp" alt="Illustrated guide showing how to add a photograph or document"><br><strong>Add media</strong></td>
+<td width="50%"><img src="resources/screenshots/source-citation-guide.webp" alt="Illustrated guide showing how to add a source citation"><br><strong>Add a citation</strong></td>
+</tr>
+</table>
+
+See [`NOTICE.md`](NOTICE.md) and [`resources/screenshots/README.md`](resources/screenshots/README.md) for image sources and attribution.
+
+## Optional Potts modules
+
+Articles can be linked to supported optional modules and are shown only while every selected module is active:
+
+- Potts Biography
+- Potts Relationship Context
+- Potts Historical Facts
+- Potts Fact Ages
+- Potts Modern Theme
+
+Core webtrees articles have no module requirement.
 
 ## Visitor and member experiences
 
-The menu label changes automatically:
+Set the menu module access level to **Visitor**. The module then determines the current audience from the selected family tree:
 
-- signed-out users see **Visitor Help**
-- registered tree members see **Member Help**
+- signed-out users see the Visitor Help Centre
+- registered tree members see the Member Help Centre
+- administrators can preview either audience from the settings page
 
-Each article can be assigned to:
+Each article can be assigned to **Visitors only**, **Registered members only** or **Everyone**.
 
-- **Visitors only**
-- **Registered members only**
-- **Everyone**
+## Quick help
 
-The menu module must be configured at the **Visitor** access level so both audiences can reach it. The module then filters the articles according to the current user's membership of the selected tree.
+The landing page displays a small set of common tasks before the topic categories. Administrators can feature any published article by selecting **Show in Quick help** in the article editor.
 
-## Module-aware articles
+During the first upgraded visit, the module non-destructively marks the bundled common-task articles as featured. Administrators can then change or remove those selections.
 
-An article can require one or more supported optional modules. It is displayed only while every selected module is active. Core webtrees articles have no module requirement and are always eligible to appear.
+## Contextual help
 
-This prevents visitors from seeing instructions for Biography, Relationship Context, Historical Facts or Fact Ages when those features are unavailable on the site.
+Optional contextual links can appear beside:
 
-## Installation
+- individual-page tabs
+- family pages
+- editing forms and dialogs
 
-1. Extract the release ZIP.
-2. Copy the `potts_member_help` folder to `webtrees/modules_v4/`, replacing the earlier module folder when upgrading.
-3. Open **Control panel → Modules → All modules** and enable **POTTS Member Help Centre**.
-4. Open **Control panel → Modules → Menus**.
-5. Enable the module for the required tree and set its access level to **Visitor**.
-6. Open the module configuration page.
-
-## Upgrading from 0.2.x
-
-The existing database content is retained automatically.
-
-Open the module configuration page and choose one of these actions:
-
-- **Add missing starter articles** adds only new link names and does not alter existing articles.
-- **Replace starter articles with latest guide** updates all bundled articles with matching link names and adds missing bundled articles. Custom articles with other link names are preserved.
-
-The replacement action overwrites edits made directly to bundled starter articles. Copy or rename any heavily customised starter article before using it.
+The module recognises tasks such as adding a partner, child or parent, creating a person, editing a name, adding or editing an event, adding media and adding sources or citations. Guides open in a new tab by default to protect partially completed forms.
 
 ## Administration
 
-Open **Control panel → Modules → All modules → POTTS Member Help Centre**.
+Open **Control panel → Modules → All modules → Potts Help Centre**.
 
 Administrators can:
 
-- add, edit, publish, unpublish, order and delete articles
-- choose the visitor/member audience
-- assign a visitor or member category
-- make an article dependent on an optional module
-- preview the visitor and member experiences
-- view which supported Potts modules are active
+- add, edit, publish, unpublish, feature, order and delete articles
+- select visitor, member or shared audiences
+- assign a topic category
+- require optional modules
+- preview visitor and member views
+- filter the article list without reloading the page
+- review aggregate feedback
+- add missing starter articles
 - refresh bundled starter content
-- enable or disable contextual help by audience and page type
+- configure contextual help for each tree
 
-Article bodies use webtrees’ built-in visual CKEditor when that module is active. A plain HTML field remains available as a fallback, and all saved content is sanitised by webtrees.
+Article bodies use webtrees’ CKEditor when it is active. A plain HTML field remains available as a fallback and saved content is sanitised by webtrees.
+
+Each article can have one optional screenshot selected from the bundled library or supplied by a secure HTTPS address. Bundled files are preferred because an external image address contacts another server whenever the image is displayed. External screenshots are loaded with a no-referrer policy.
+
+## Installation
+
+1. Download the named release asset, not GitHub’s automatically generated source archive.
+2. Extract the release ZIP.
+3. Copy the enclosed `potts_member_help` folder to `webtrees/modules_v4/`, replacing the earlier folder when upgrading.
+4. Enable **Potts Help Centre** under **Control panel → Modules → All modules**.
+5. Enable its menu for the required family tree under **Control panel → Modules → Menus**.
+6. Set the menu access level to **Visitor**.
+7. Open the module settings page.
+
+No SQL script or manual database migration is required. See [`INSTALL.md`](INSTALL.md) for detailed upgrade notes.
 
 ## Compatibility
 
 - webtrees 2.2.x
-- designed against webtrees 2.2.6
+- designed and checked against webtrees 2.2.6
 - Potts modules are optional
 - Potts Modern Theme is optional
-- standard webtrees themes should also work
-
-## Planned enhancements
-
-- screenshots and image placement within instructions
-- editable categories and landing-page introductions
-- import and export of help content
-- translated article sets
-- more detailed contextual matching for additional webtrees and third-party module forms
+- standard webtrees themes should remain supported
 
 ## Project links
 
-- Repository: https://github.com/PottsNet/potts-member-help
-- Issues and support: https://github.com/PottsNet/potts-member-help/issues
-- Releases: https://github.com/PottsNet/potts-member-help/releases
+- Repository: https://github.com/PottsNet/potts-help-centre
+- Issues and support: https://github.com/PottsNet/potts-help-centre/issues
+- Releases: https://github.com/PottsNet/potts-help-centre/releases
+
+The GitHub repository name is separate from the module’s internal `potts_member_help` identity.
+
+## Release status
+
+`1.0.0-rc.1` is a release candidate. Complete the checks in [`TESTING.md`](TESTING.md) on an upgraded site and, where practical, a clean webtrees installation before publishing 1.0.0 as a full release.
 
 ## Licence
 
-GPL-3.0-or-later. See `LICENSE`.
+GPL-3.0-or-later. See [`LICENSE`](LICENSE). Third-party image attribution is recorded in [`NOTICE.md`](NOTICE.md).

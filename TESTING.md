@@ -1,133 +1,111 @@
-# Testing checklist
+# Release-candidate test checklist — 1.0.0-rc.1
 
-## Installation and upgrade
+Record the webtrees version, PHP version, theme, browser and device used for each test round.
 
-- [ ] Module loads without a PHP or SQL error.
-- [ ] Existing 0.2.x articles remain after replacing the module folder.
-- [ ] **Add missing starter articles** adds new link names without altering existing articles.
-- [ ] **Replace starter articles with latest guide** updates bundled articles and preserves custom link names.
-- [ ] Settings page reports version 0.4.0-alpha.4.
-- [ ] While signed out on desktop, Theme, Language, History and Sign in appear on one vertically centred row.
-- [ ] Sign in uses a compact inline icon/label treatment and does not adopt the tall genealogy-menu layout.
-- [ ] The cream genealogy menu remains consistently aligned.
-- [ ] Tablet and mobile navigation are unchanged.
+## Upgrade and identity
 
-## Audience behaviour
+- [ ] Back up the current module folder and database before testing.
+- [ ] Replace an earlier `potts_member_help` folder without deleting database content.
+- [ ] The control panel shows **Potts Help Centre** and version `1.0.0-rc.1`.
+- [ ] Existing articles, settings, ordering and feedback totals remain available.
+- [ ] Matching starter articles with no existing image receive bundled screenshots without replacing written instructions or custom images.
+- [ ] The public menu label is **Help**.
+- [ ] The installation folder remains exactly `modules_v4/potts_member_help/`.
 
-- [ ] Signed-out users see **Visitor Help**.
-- [ ] Registered tree members see **Member Help**.
-- [ ] Visitor-only articles are not visible to members in normal view.
-- [ ] Member-only articles are not visible to visitors.
-- [ ] Everyone articles appear in both experiences.
-- [ ] Administrator preview links work without signing out.
+## Clean-install check
 
-## Module awareness
+- [ ] A clean webtrees 2.2.x installation enables the module without an exception.
+- [ ] Opening settings creates the starter article set once only.
+- [ ] No SQL script or manual database operation is required.
+- [ ] Disabling and re-enabling the module does not duplicate articles.
 
-Test with each supported module active and inactive:
+## Visitor experience
 
-- [ ] Potts Biography articles appear only when Potts Biography is active.
-- [ ] Relationship Context articles appear only when Potts Relationship Context is active.
-- [ ] Historical Facts articles appear only when Potts Historical Facts is active.
-- [ ] Articles requiring both Biography and Historical Facts disappear if either module is inactive.
-- [ ] Fact Ages articles appear only when Potts Fact Ages is active.
-- [ ] Core webtrees articles remain visible regardless of optional-module status.
-- [ ] Module status badges in administration are accurate.
-- [ ] Custom article module requirements save and reload correctly.
+- [ ] Signed out, the page title is **Visitor Help Centre**.
+- [ ] Quick help shows common visitor tasks.
+- [ ] Topic cards show article counts.
+- [ ] The landing page does not initially display every article.
+- [ ] **View all help articles** opens the full visitor list.
+- [ ] Visitor-only and shared articles are visible; member-only articles are hidden.
 
-## Content and navigation
+## Member experience
 
-- [ ] All 71 starter articles are present after a full refresh.
-- [ ] Search finds terms such as Biography, Families, close relatives, relationship and historical.
-- [ ] Category filters show only categories with visible articles.
-- [ ] Direct links to unavailable module-specific articles return not found.
-- [ ] Related instructions never link to an unavailable article.
-- [ ] Feature badges appear on module-specific article cards and pages.
+- [ ] Signed in as a tree member, the page title is **Member Help Centre**.
+- [ ] Quick help shows common editing tasks.
+- [ ] Member-only and shared articles are visible; visitor-only articles are hidden.
+- [ ] Member contextual help appears on supported pages and forms.
 
-## Editing
+## Permissions and privacy
 
-- [ ] New article can be created.
-- [ ] Existing article can be edited.
-- [ ] Visitor/member audience selection saves correctly.
-- [ ] One or more required modules can be selected.
-- [ ] Article can be published and unpublished.
-- [ ] Article order changes correctly.
-- [ ] Article can be deleted.
-- [ ] HTML is sanitised when saved.
+- [ ] Users without editing permission do not receive misleading editing actions from the module.
+- [ ] Living-person information is not exposed through starter content or screenshots.
+- [ ] Administrator visitor/member preview does not bypass webtrees record privacy.
+- [ ] External screenshots use HTTPS and send no referrer header.
+- [ ] External links opening a new tab include `noopener noreferrer`.
 
-## Themes and devices
+## Search
 
-- [ ] Potts Modern Theme desktop layout.
-- [ ] Contextual help remains subtle and readable in each Potts Modern colour preset.
-- [ ] Contextual help accent, icon and action link change with the selected Potts Modern preset.
-- [ ] Potts Modern Theme phone and tablet layout.
-- [ ] Clouds or another standard webtrees theme.
-- [ ] Administration table remains usable on smaller screens.
-## Typography regression
+- [ ] A multi-word search finds articles when the words are separated within article text.
+- [ ] Exact title matches rank above body-only matches.
+- [ ] Search within a category retains that category scope.
+- [ ] Result counts use correct singular and plural wording.
+- [ ] An empty result shows a clear recovery action.
 
-- [ ] Article titles are visible in Potts Modern Theme.
-- [ ] Article titles are visible in Clouds or another standard webtrees theme.
-- [ ] Landing-page, section, card and sidebar headings remain readable.
-- [ ] Light and dark appearances retain adequate heading contrast.
-- [ ] The article header does not leave an excessive blank area above the summary.
-- [ ] Mobile article headings wrap cleanly without clipping.
+## Article page
 
+- [ ] Reading time appears beside the topic.
+- [ ] Articles with two or more headings receive an **On this page** table of contents.
+- [ ] Table-of-contents links scroll to the correct section.
+- [ ] **Copy link** copies the current article URL.
+- [ ] **Print guide** produces a clean article-only print layout.
+- [ ] Previous and next article links work.
+- [ ] Related instructions remain available.
+- [ ] All 12 illustrated starter articles show the correct screenshot, caption, alternative text and source.
+- [ ] Annotated guides contain only fictional example data and remain clearly labelled as illustrations.
+- [ ] Clicking a screenshot opens the full-size image.
+- [ ] The screen-difference notice appears only when an article has a screenshot.
+- [ ] Screenshot images remain legible on phone, tablet and desktop widths.
 
-## Menu regression
+## Feedback
 
-- [ ] Signed-out users see a distinct help/FAQ icon rather than an account-style grid icon.
-- [ ] Visitor Help does not appear to overlap or sit behind the sign-in control.
-- [ ] Visitor Help icon and label align with Family tree, Charts, Lists, Calendar, Reports, Search and Books.
-- [ ] Signed-in Member Help alignment is unchanged.
-- [ ] Menu alignment remains correct in Potts Modern and a standard webtrees theme.
-- [ ] Narrow desktop and tablet widths wrap or collapse the menu without overlap.
+- [ ] A **Yes** or **Not quite** response records once per browser session and article.
+- [ ] Returning to the article in the same session shows **Feedback already recorded**.
+- [ ] Administrator preview does not permit feedback.
+- [ ] Aggregate totals remain visible in administration.
 
-## Rich-text editor
+## Administration
 
-- [ ] With CKEditor active, the Instructions field displays a visual toolbar.
-- [ ] Headings, bold text, numbered lists, bullet lists, links and tables save correctly.
-- [ ] Source mode can inspect and edit the underlying HTML.
-- [ ] Saved content is still sanitised.
-- [ ] The **View saved article** button opens the published article in a new tab.
-- [ ] With CKEditor disabled, a warning appears and the plain HTML textarea remains usable.
+- [ ] Dashboard totals match the article list.
+- [ ] Helpful percentage is correct when responses exist and shows a dash when none exist.
+- [ ] Article text, audience, publication and Quick help filters work without reloading.
+- [ ] Selecting **Show in Quick help** adds the article to the correct audience landing page.
+- [ ] The **Articles to review** panel appears only when sufficient feedback exists.
+- [ ] Visitor and member preview buttons open the correct view.
+- [ ] The illustrated-guide total matches the number of articles with screenshots.
+- [ ] The editor accepts a bundled `module://` image and a secure HTTPS image address.
+- [ ] Invalid or non-HTTPS image addresses are not displayed.
+- [ ] Clearing the screenshot field removes the image without affecting the article body.
 
+## Contextual help and themes
 
-## Feedback testing
+- [ ] Individual-page tab guidance updates when tabs change.
+- [ ] Family-page guidance appears when enabled.
+- [ ] Editing dialogs receive the correct task-specific guide.
+- [ ] New-tab behaviour protects partially completed forms.
+- [ ] Potts Modern colour presets remain readable.
+- [ ] Clouds and at least one other standard webtrees theme remain readable.
+- [ ] Desktop, tablet and phone layouts do not overflow.
+- [ ] The Help menu does not overlap sign-in or other navigation items.
 
-1. Open a published visitor article while signed out.
-2. Select **Yes** and confirm that the in-page thank-you message appears.
-3. Reload the first article, vote again and confirm its count does not increase twice in the same browser session.
-4. Open another article and select **Not quite**.
-5. Sign in as administrator and confirm the aggregate and per-article counts increased.
-6. Preview the visitor or member experience from administration and confirm voting is disabled in preview mode.
-7. Confirm no feedback option is shown outside article pages.
+## Optional-module regression
 
-## Potts Modern menu alignment
+- [ ] Core help remains usable with every optional Potts module disabled.
+- [ ] Module-specific articles hide when their required module is disabled.
+- [ ] Re-enabling a required module restores its applicable articles.
 
-1. Check the desktop menu while signed out and signed in.
-2. Confirm the icons and labels begin on the same horizontal rows.
-3. Confirm drop-down carets sit consistently below labels.
-4. Check the menu at tablet and phone widths to confirm mobile navigation is unchanged.
-## Contextual help links
+## Release decision
 
-- [ ] Contextual guide links remain readable in their normal, hover and keyboard-focus states.
-- [ ] Hovering a contextual guide link shows dark text on a softly tinted background rather than white text on a transparent background.
-- [ ] Contextual help settings save separately for each family tree.
-- [ ] Disabling contextual help removes all contextual links without hiding the Help Centre menu.
-- [ ] Visitor and member audience switches work independently.
-- [ ] The individual-page switch controls only the tab-level guide.
-- [ ] The family-page switch controls only the family-page guide.
-- [ ] The editing-forms switch controls modal and full-page editing help.
-- [ ] Biography displays a Biography-specific guide.
-- [ ] Facts and events displays the correct visitor or member article.
-- [ ] Families displays family-relationship guidance.
-- [ ] Media displays photograph/document guidance.
-- [ ] Changing tabs updates the contextual guide without reloading the page.
-- [ ] Family pages display a family-specific guide above the family content.
-- [ ] Add partner, add child and add parent dialogs display the matching guide.
-- [ ] Create person, edit name, add fact/event, edit fact/event, add media and add citation forms display matching guides when their headings are recognised.
-- [ ] Contextual links never appear inside the Help Centre itself.
-- [ ] New-tab mode preserves any information already entered in an editing form.
-- [ ] Turning off new-tab mode opens the guide in the current tab.
-- [ ] Contextual links are readable in Potts Modern and at least one standard webtrees theme.
-- [ ] Contextual links wrap cleanly on phone-sized screens.
-
+- [ ] No PHP errors, browser-console errors or failed network requests attributable to the module.
+- [ ] GitHub Actions quality checks pass on the release commit.
+- [ ] Any release-blocking issue is fixed and retested.
+- [ ] The candidate is approved for version `1.0.0`.

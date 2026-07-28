@@ -36,6 +36,8 @@ use function array_key_exists;
 use function array_map;
 use function array_merge;
 use function array_unique;
+use function array_values;
+use function ceil;
 use function count;
 use function explode;
 use function file_get_contents;
@@ -46,9 +48,11 @@ use function is_string;
 use function json_encode;
 use function mb_strtolower;
 use function preg_replace;
+use function preg_split;
 use function redirect;
 use function route;
 use function strip_tags;
+use function str_word_count;
 use function str_contains;
 use function strtolower;
 use function strtok;
@@ -60,7 +64,7 @@ final class PottsMemberHelp extends AbstractModule implements ModuleMenuInterfac
     use ModuleConfigTrait;
     use ModuleCustomTrait;
 
-    private const VERSION = '0.4.0-alpha.4';
+    private const VERSION = '1.0.0-rc.1';
 
     private ?HelpRepository $repository = null;
 
@@ -72,12 +76,12 @@ final class PottsMemberHelp extends AbstractModule implements ModuleMenuInterfac
 
     public function title(): string
     {
-        return I18N::translate('POTTS Member Help Centre');
+        return I18N::translate('Potts Help Centre');
     }
 
     public function description(): string
     {
-        return I18N::translate('A webtrees-specific visitor and member guide with searchable, audience-aware and module-aware help articles.');
+        return I18N::translate('An inclusive webtrees help centre for visitors and members, with searchable, contextual and module-aware guidance.');
     }
 
     public function isEnabledByDefault(): bool
@@ -92,12 +96,8 @@ final class PottsMemberHelp extends AbstractModule implements ModuleMenuInterfac
 
     public function getMenu(Tree $tree): Menu|null
     {
-        $label = Auth::isMember($tree)
-            ? I18N::translate('Member Help')
-            : I18N::translate('Visitor Help');
-
         return new Menu(
-            $label,
+            I18N::translate('Help'),
             route('module', [
                 'module' => $this->name(),
                 'action' => 'Show',
@@ -127,11 +127,18 @@ final class PottsMemberHelp extends AbstractModule implements ModuleMenuInterfac
 
     public function bodyContent(): string
     {
+        $output = '';
+        $helpScriptFile = $this->resourcesFolder() . 'js/help-centre.js';
+        $helpScript = is_file($helpScriptFile) ? file_get_contents($helpScriptFile) : false;
+        if (is_string($helpScript) && $helpScript !== '') {
+            $output .= '<script data-potts-help-centre>' . $helpScript . '</script>';
+        }
+
         $request = Registry::container()->get(ServerRequestInterface::class);
         $tree = Validator::attributes($request)->treeOptional();
 
         if (!$tree instanceof Tree) {
-            return '';
+            return $output;
         }
 
         $settings = $this->contextualHelpSettings($tree);
@@ -140,26 +147,26 @@ final class PottsMemberHelp extends AbstractModule implements ModuleMenuInterfac
             : HelpRepository::AUDIENCE_VISITORS;
 
         if (!$settings['enabled']) {
-            return '';
+            return $output;
         }
 
         if ($audience === HelpRepository::AUDIENCE_VISITORS && !$settings['visitors']) {
-            return '';
+            return $output;
         }
 
         if ($audience === HelpRepository::AUDIENCE_MEMBERS && !$settings['members']) {
-            return '';
+            return $output;
         }
 
         $contexts = $this->contextualHelpLinks($tree, $audience);
         if ($contexts === []) {
-            return '';
+            return $output;
         }
 
         $scriptFile = $this->resourcesFolder() . 'js/contextual-help.js';
         $script = is_file($scriptFile) ? file_get_contents($scriptFile) : false;
         if (!is_string($script) || $script === '') {
-            return '';
+            return $output;
         }
 
         $config = [
@@ -177,25 +184,34 @@ final class PottsMemberHelp extends AbstractModule implements ModuleMenuInterfac
 
         $json = json_encode($config, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
         if (!is_string($json)) {
-            return '';
+            return $output;
         }
 
-        return '<script data-potts-member-help-context>window.PottsMemberHelpContext=' . $json . ';' . $script . '</script>';
+        return $output . '<script data-potts-member-help-context>window.PottsMemberHelpContext=' . $json . ';' . $script . '</script>';
     }
 
     public function getShowAction(ServerRequestInterface $request): ResponseInterface
     {
         $tree = Validator::attributes($request)->tree();
+        $this->ensureFeaturedUpgrade($tree);
+        $this->ensureScreenshotUpgrade($tree);
         [$audience, $actualAudience, $audienceQuery] = $this->resolveAudience($request, $tree);
 
         $query = trim(Validator::queryParams($request)->string('q', ''));
         $category = trim(Validator::queryParams($request)->string('category', ''));
+        $showAll = Validator::queryParams($request)->string('view', '') === 'all';
         $moduleStatus = $this->companionModuleStatus();
-        $articles = $this->filterByAvailableModules(
+        $allArticles = $this->filterByAvailableModules(
             $this->repository()->articlesForAudience($tree, $audience),
             $moduleStatus
         );
-        $categories = $this->visibleCategories($articles);
+        $categories = $this->visibleCategories($allArticles);
+        $categoryCounts = $allArticles
+            ->groupBy('category')
+            ->map(static fn (Collection $items): int => $items->count())
+            ->all();
+        $quickHelp = $this->featuredArticles($allArticles, $audience);
+        $articles = $allArticles;
 
         if ($category !== '' && array_key_exists($category, $categories)) {
             $articles = $articles->filter(static fn (object $article): bool => $article->category === $category)->values();
@@ -204,12 +220,7 @@ final class PottsMemberHelp extends AbstractModule implements ModuleMenuInterfac
         }
 
         if ($query !== '') {
-            $needle = mb_strtolower($query);
-            $articles = $articles->filter(static function (object $article) use ($needle): bool {
-                $haystack = mb_strtolower($article->title . ' ' . $article->summary . ' ' . strip_tags($article->body));
-
-                return str_contains($haystack, $needle);
-            })->values();
+            $articles = $this->searchArticles($articles, $query, $categories);
         }
 
         $page = $this->pageText($audience);
@@ -217,8 +228,13 @@ final class PottsMemberHelp extends AbstractModule implements ModuleMenuInterfac
         return $this->viewResponse('potts-member-help::index', [
             'articles' => $articles,
             'categories' => $categories,
+            'categoryCounts' => $categoryCounts,
             'category' => $category,
             'query' => $query,
+            'resultCount' => $articles->count(),
+            'totalCount' => $allArticles->count(),
+            'showAll' => $showAll,
+            'quickHelp' => $quickHelp,
             'title' => $page['title'],
             'eyebrow' => $page['eyebrow'],
             'intro' => $page['intro'],
@@ -235,6 +251,7 @@ final class PottsMemberHelp extends AbstractModule implements ModuleMenuInterfac
     public function getArticleAction(ServerRequestInterface $request): ResponseInterface
     {
         $tree = Validator::attributes($request)->tree();
+        $this->ensureScreenshotUpgrade($tree);
         [$audience, $actualAudience, $audienceQuery] = $this->resolveAudience($request, $tree);
 
         $moduleStatus = $this->companionModuleStatus();
@@ -253,6 +270,12 @@ final class PottsMemberHelp extends AbstractModule implements ModuleMenuInterfac
             ->filter(static fn (object $item): bool => $item->category === $article->category && $item->slug !== $article->slug)
             ->take(4)
             ->values();
+        $position = $visibleArticles->search(static fn (object $item): bool => $item->slug === $article->slug);
+        $previous = is_int($position) && $position > 0 ? $visibleArticles->get($position - 1) : null;
+        $next = is_int($position) && $position < $visibleArticles->count() - 1 ? $visibleArticles->get($position + 1) : null;
+        $feedbackSession = $_SESSION['potts_member_help_feedback'] ?? [];
+        $feedbackKey = $tree->id() . ':' . $article->slug;
+        $feedbackGiven = is_array($feedbackSession) && array_key_exists($feedbackKey, $feedbackSession);
         $page = $this->pageText($audience);
 
         return $this->viewResponse('potts-member-help::article', [
@@ -267,7 +290,12 @@ final class PottsMemberHelp extends AbstractModule implements ModuleMenuInterfac
             'tree' => $tree,
             'moduleName' => $this->name(),
             'moduleRequirements' => $this->companionModules(),
-            'feedbackRecorded' => Validator::queryParams($request)->string('feedback', '') === 'recorded',
+            'readingTime' => $this->readingTime((string) $article->body),
+            'previous' => $previous,
+            'next' => $next,
+            'feedbackGiven' => $feedbackGiven,
+            'feedbackRecorded' => $feedbackGiven && Validator::queryParams($request)->string('feedback', '') === 'recorded',
+            'screenshotUrl' => $this->articleScreenshotUrl($article),
         ]);
     }
 
@@ -340,7 +368,24 @@ final class PottsMemberHelp extends AbstractModule implements ModuleMenuInterfac
         }
 
         $this->repository()->ensureSeeded($tree);
+        $this->ensureFeaturedUpgrade($tree);
+        $this->ensureScreenshotUpgrade($tree);
         $articles = $this->repository()->articles($tree, true);
+        $publishedArticles = $articles->filter(static fn (object $article): bool => $article->published === true);
+        $feedbackYes = (int) $articles->sum('feedback_yes');
+        $feedbackNo = (int) $articles->sum('feedback_no');
+        $feedbackResponses = $feedbackYes + $feedbackNo;
+        $attentionArticles = $articles
+            ->filter(static fn (object $article): bool => ((int) ($article->feedback_yes ?? 0) + (int) ($article->feedback_no ?? 0)) >= 2)
+            ->sortByDesc(static function (object $article): float {
+                $yes = (int) ($article->feedback_yes ?? 0);
+                $no = (int) ($article->feedback_no ?? 0);
+                $total = $yes + $no;
+
+                return $total > 0 ? $no / $total : 0.0;
+            })
+            ->take(5)
+            ->values();
 
         return $this->viewResponse('potts-member-help::admin', [
             'articles' => $articles,
@@ -355,9 +400,21 @@ final class PottsMemberHelp extends AbstractModule implements ModuleMenuInterfac
             'moduleRequirements' => $this->companionModules(),
             'moduleStatus' => $this->companionModuleStatus(),
             'feedbackTotals' => [
-                'yes' => (int) $articles->sum('feedback_yes'),
-                'no' => (int) $articles->sum('feedback_no'),
+                'yes' => $feedbackYes,
+                'no' => $feedbackNo,
             ],
+            'dashboard' => [
+                'total' => $articles->count(),
+                'published' => $publishedArticles->count(),
+                'drafts' => $articles->count() - $publishedArticles->count(),
+                'visitors' => $articles->where('audience', HelpRepository::AUDIENCE_VISITORS)->count(),
+                'members' => $articles->where('audience', HelpRepository::AUDIENCE_MEMBERS)->count(),
+                'everyone' => $articles->where('audience', HelpRepository::AUDIENCE_EVERYONE)->count(),
+                'featured' => $articles->filter(static fn (object $article): bool => (bool) ($article->featured ?? false))->count(),
+                'screenshots' => $articles->filter(static fn (object $article): bool => trim((string) ($article->screenshot ?? '')) !== '')->count(),
+                'helpful_rate' => $feedbackResponses > 0 ? (int) round(($feedbackYes / $feedbackResponses) * 100) : null,
+            ],
+            'attentionArticles' => $attentionArticles,
             'contextualSettings' => $this->contextualHelpSettings($tree),
         ]);
     }
@@ -469,6 +526,12 @@ final class PottsMemberHelp extends AbstractModule implements ModuleMenuInterfac
                 'audience' => HelpRepository::AUDIENCE_MEMBERS,
                 'requires_modules' => '',
                 'published' => true,
+                'featured' => false,
+                'screenshot' => '',
+                'screenshot_alt' => '',
+                'screenshot_caption' => '',
+                'screenshot_source' => '',
+                'screenshot_source_url' => '',
             ];
         }
 
@@ -482,6 +545,7 @@ final class PottsMemberHelp extends AbstractModule implements ModuleMenuInterfac
             'moduleRequirements' => $this->companionModules(),
             'moduleStatus' => $this->companionModuleStatus(),
             'richTextEditorAvailable' => $this->richTextEditorAvailable(),
+            'screenshotUrl' => $this->articleScreenshotUrl($article),
         ]);
     }
 
@@ -528,6 +592,12 @@ final class PottsMemberHelp extends AbstractModule implements ModuleMenuInterfac
             'audience' => $audience,
             'requires_modules' => $requiresModules,
             'published' => Validator::parsedBody($request)->boolean('published', false),
+            'featured' => Validator::parsedBody($request)->boolean('featured', false),
+            'screenshot' => Validator::parsedBody($request)->string('screenshot', ''),
+            'screenshot_alt' => Validator::parsedBody($request)->string('screenshot_alt', ''),
+            'screenshot_caption' => Validator::parsedBody($request)->string('screenshot_caption', ''),
+            'screenshot_source' => Validator::parsedBody($request)->string('screenshot_source', ''),
+            'screenshot_source_url' => Validator::parsedBody($request)->string('screenshot_source_url', ''),
             'block_order' => Validator::parsedBody($request)->integer('block_order', 1),
         ], $blockId);
 
@@ -593,11 +663,143 @@ final class PottsMemberHelp extends AbstractModule implements ModuleMenuInterfac
         }
 
         return [
-            'title' => I18N::translate('POTTS Member Help Centre'),
+            'title' => I18N::translate('Member Help Centre'),
             'eyebrow' => I18N::translate('Webtrees editing and contribution guide'),
             'intro' => I18N::translate('Use the correct webtrees tabs to add people, relationships, facts, events, media and sources, then understand how those records feed Biography and other optional modules.'),
             'search_placeholder' => I18N::translate('Search for Families, Facts and events, Biography, photos…'),
         ];
+    }
+
+    /** @param array<string,array{title:string,description:string,group:string}> $categories
+     *  @return Collection<int,object>
+     */
+    private function searchArticles(Collection $articles, string $query, array $categories): Collection
+    {
+        $phrase = $this->normaliseSearchText($query);
+        $terms = array_values(array_filter(preg_split('/\s+/u', $phrase) ?: []));
+        if ($terms === []) {
+            return $articles;
+        }
+
+        return $articles
+            ->filter(function (object $article) use ($terms, $categories): bool {
+                $categoryTitle = (string) ($categories[$article->category]['title'] ?? '');
+                $haystack = $this->normaliseSearchText(
+                    $article->title . ' ' . $article->summary . ' ' . $categoryTitle . ' ' . strip_tags($article->body)
+                );
+
+                foreach ($terms as $term) {
+                    if (!str_contains($haystack, $term)) {
+                        return false;
+                    }
+                }
+
+                return true;
+            })
+            ->sortByDesc(function (object $article) use ($phrase, $terms, $categories): int {
+                $title = $this->normaliseSearchText((string) $article->title);
+                $summary = $this->normaliseSearchText((string) $article->summary);
+                $category = $this->normaliseSearchText((string) ($categories[$article->category]['title'] ?? ''));
+                $body = $this->normaliseSearchText(strip_tags((string) $article->body));
+                $score = 0;
+
+                if ($phrase !== '' && str_contains($title, $phrase)) {
+                    $score += 30;
+                }
+                if ($phrase !== '' && str_contains($summary, $phrase)) {
+                    $score += 15;
+                }
+
+                foreach ($terms as $term) {
+                    $score += str_contains($title, $term) ? 8 : 0;
+                    $score += str_contains($summary, $term) ? 4 : 0;
+                    $score += str_contains($category, $term) ? 3 : 0;
+                    $score += str_contains($body, $term) ? 1 : 0;
+                }
+
+                return $score;
+            })
+            ->values();
+    }
+
+    private function normaliseSearchText(string $value): string
+    {
+        $value = mb_strtolower(strip_tags($value));
+        $value = preg_replace('/[^\p{L}\p{N}]+/u', ' ', $value) ?? '';
+
+        return trim($value);
+    }
+
+    /** @return Collection<int,object> */
+    private function featuredArticles(Collection $articles, string $audience): Collection
+    {
+        $limit = $audience === HelpRepository::AUDIENCE_VISITORS ? 4 : 6;
+
+        return $articles
+            ->filter(static fn (object $article): bool => (bool) ($article->featured ?? false))
+            ->take($limit)
+            ->values();
+    }
+
+    private function ensureFeaturedUpgrade(Tree $tree): void
+    {
+        $preference = 'featured_upgrade_' . $tree->id();
+        if ($this->getPreference($preference, '0') === '1') {
+            return;
+        }
+
+        $this->repository()->seedFeaturedDefaults($tree);
+        $this->setPreference($preference, '1');
+    }
+
+    private function ensureScreenshotUpgrade(Tree $tree): void
+    {
+        $preference = 'screenshot_upgrade_060_alpha2_' . $tree->id();
+        if ($this->getPreference($preference, '0') === '1') {
+            return;
+        }
+
+        $this->repository()->seedBundledScreenshots($tree);
+        $this->setPreference($preference, '1');
+    }
+
+    private function articleScreenshotUrl(object $article): string
+    {
+        $value = trim((string) ($article->screenshot ?? ''));
+        if ($value === '') {
+            return '';
+        }
+
+        if (!str_starts_with($value, 'module://')) {
+            return str_starts_with(strtolower($value), 'https://') ? $value : '';
+        }
+
+        $file = preg_replace('/[^a-zA-Z0-9._-]/', '', substr($value, 9)) ?? '';
+        if ($file === '') {
+            return '';
+        }
+
+        $path = $this->resourcesFolder() . 'screenshots/' . $file;
+        $extension = strtolower((string) pathinfo($path, PATHINFO_EXTENSION));
+        if (!is_file($path) || !in_array($extension, ['png', 'jpg', 'jpeg', 'webp'], true)) {
+            return '';
+        }
+
+        $mime = match ($extension) {
+            'jpg', 'jpeg' => 'image/jpeg',
+            'webp' => 'image/webp',
+            default => 'image/png',
+        };
+        $contents = file_get_contents($path);
+
+        return is_string($contents) ? 'data:' . $mime . ';base64,' . base64_encode($contents) : '';
+    }
+
+    private function readingTime(string $body): int
+    {
+        $wordCount = str_word_count(strip_tags($body));
+
+        return max(1, (int) ceil($wordCount / 220));
     }
 
     /** @return array<string,string> */
@@ -852,12 +1054,12 @@ final class PottsMemberHelp extends AbstractModule implements ModuleMenuInterfac
 
     public function customModuleSupportUrl(): string
     {
-        return 'https://github.com/PottsNet/potts-member-help/issues';
+        return 'https://github.com/PottsNet/potts-help-centre/issues';
     }
 
     public function customModuleLatestVersionUrl(): string
     {
-        return 'https://raw.githubusercontent.com/PottsNet/potts-member-help/main/latest-version.txt';
+        return 'https://raw.githubusercontent.com/PottsNet/potts-help-centre/main/latest-version.txt';
     }
 
     /** @return array<string,string> */

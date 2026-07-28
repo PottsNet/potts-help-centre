@@ -160,6 +160,60 @@ final class HelpRepository
         }
     }
 
+    public function seedFeaturedDefaults(Tree $tree): int
+    {
+        $existing = $this->storedArticles($tree)->keyBy('slug');
+        $updated = 0;
+
+        foreach ($this->defaults() as $article) {
+            if (empty($article['featured'])) {
+                continue;
+            }
+
+            $slug = $this->normaliseSlug((string) ($article['slug'] ?? $article['title'] ?? ''));
+            $stored = $existing->get($slug);
+            if (!$stored instanceof stdClass || (bool) ($stored->featured ?? false)) {
+                continue;
+            }
+
+            $this->setSetting((int) $stored->block_id, 'featured', '1');
+            ++$updated;
+        }
+
+        return $updated;
+    }
+
+
+    /** Add bundled screenshot metadata to matching starter articles without replacing article text. */
+    public function seedBundledScreenshots(Tree $tree): int
+    {
+        $existing = $this->storedArticles($tree)->keyBy('slug');
+        $updated = 0;
+
+        foreach ($this->defaults() as $article) {
+            $screenshot = $this->normaliseScreenshot((string) ($article['screenshot'] ?? ''));
+            if ($screenshot === '') {
+                continue;
+            }
+
+            $slug = $this->normaliseSlug((string) ($article['slug'] ?? $article['title'] ?? ''));
+            $stored = $existing->get($slug);
+            if (!$stored instanceof stdClass || trim((string) ($stored->screenshot ?? '')) !== '') {
+                continue;
+            }
+
+            $blockId = (int) $stored->block_id;
+            $this->setSetting($blockId, 'screenshot', $screenshot);
+            $this->setSetting($blockId, 'screenshot_alt', trim(strip_tags((string) ($article['screenshot_alt'] ?? ''))));
+            $this->setSetting($blockId, 'screenshot_caption', trim(strip_tags((string) ($article['screenshot_caption'] ?? ''))));
+            $this->setSetting($blockId, 'screenshot_source', trim(strip_tags((string) ($article['screenshot_source'] ?? ''))));
+            $this->setSetting($blockId, 'screenshot_source_url', $this->normaliseSourceUrl((string) ($article['screenshot_source_url'] ?? '')));
+            ++$updated;
+        }
+
+        return $updated;
+    }
+
     public function missingDefaultCount(Tree $tree): int
     {
         $existingSlugs = $this->storedArticles($tree)
@@ -235,8 +289,14 @@ final class HelpRepository
                 $row->block_id = 0;
                 $row->block_order = (int) ($article['block_order'] ?? $index + 1);
                 $row->published = (bool) ($article['published'] ?? true);
+                $row->featured = (bool) ($article['featured'] ?? false);
                 $row->audience = $this->normaliseAudience((string) ($article['audience'] ?? self::AUDIENCE_MEMBERS));
                 $row->requires_modules = $this->normaliseModuleList($article['requires_modules'] ?? '');
+                $row->screenshot = trim((string) ($article['screenshot'] ?? ''));
+                $row->screenshot_alt = trim((string) ($article['screenshot_alt'] ?? ''));
+                $row->screenshot_caption = trim((string) ($article['screenshot_caption'] ?? ''));
+                $row->screenshot_source = trim((string) ($article['screenshot_source'] ?? ''));
+                $row->screenshot_source_url = trim((string) ($article['screenshot_source_url'] ?? ''));
                 $row->feedback_yes = 0;
                 $row->feedback_no = 0;
                 $row->is_default = true;
@@ -286,7 +346,13 @@ final class HelpRepository
         $body = trim((string) ($data['body'] ?? ''));
         $audience = $this->normaliseAudience((string) ($data['audience'] ?? self::AUDIENCE_MEMBERS));
         $requiresModules = $this->normaliseModuleList($data['requires_modules'] ?? '');
+        $screenshot = $this->normaliseScreenshot((string) ($data['screenshot'] ?? ''));
+        $screenshotAlt = trim(strip_tags((string) ($data['screenshot_alt'] ?? '')));
+        $screenshotCaption = trim(strip_tags((string) ($data['screenshot_caption'] ?? '')));
+        $screenshotSource = trim(strip_tags((string) ($data['screenshot_source'] ?? '')));
+        $screenshotSourceUrl = $this->normaliseSourceUrl((string) ($data['screenshot_source_url'] ?? ''));
         $published = !empty($data['published']) ? '1' : '0';
+        $featured = !empty($data['featured']) ? '1' : '0';
         $blockOrder = max(1, (int) ($data['block_order'] ?? 1));
 
         if ($blockId > 0) {
@@ -322,6 +388,12 @@ final class HelpRepository
         $this->setSetting($blockId, 'audience', $audience);
         $this->setSetting($blockId, 'requires_modules', $requiresModules);
         $this->setSetting($blockId, 'published', $published);
+        $this->setSetting($blockId, 'featured', $featured);
+        $this->setSetting($blockId, 'screenshot', $screenshot);
+        $this->setSetting($blockId, 'screenshot_alt', $screenshotAlt);
+        $this->setSetting($blockId, 'screenshot_caption', $screenshotCaption);
+        $this->setSetting($blockId, 'screenshot_source', $screenshotSource);
+        $this->setSetting($blockId, 'screenshot_source_url', $screenshotSourceUrl);
 
         return $blockId;
     }
@@ -397,7 +469,13 @@ final class HelpRepository
             $article->body = '';
             $article->audience = self::AUDIENCE_MEMBERS;
             $article->requires_modules = '';
+            $article->screenshot = '';
+            $article->screenshot_alt = '';
+            $article->screenshot_caption = '';
+            $article->screenshot_source = '';
+            $article->screenshot_source_url = '';
             $article->published = true;
+            $article->featured = false;
             $article->feedback_yes = 0;
             $article->feedback_no = 0;
             $article->is_default = false;
@@ -406,8 +484,8 @@ final class HelpRepository
                 $name = (string) $setting->setting_name;
                 $value = (string) $setting->setting_value;
 
-                if ($name === 'published') {
-                    $article->published = $value === '1';
+                if ($name === 'published' || $name === 'featured') {
+                    $article->{$name} = $value === '1';
                 } elseif ($name === 'feedback_yes' || $name === 'feedback_no') {
                     $article->{$name} = max(0, (int) $value);
                 } elseif (property_exists($article, $name)) {
@@ -434,6 +512,32 @@ final class HelpRepository
             'setting_name' => $name,
             'setting_value' => $value,
         ]);
+    }
+
+
+    private function normaliseScreenshot(string $value): string
+    {
+        $value = trim(strip_tags($value));
+        if ($value === '') {
+            return '';
+        }
+
+        if (str_starts_with($value, 'module://')) {
+            $file = substr($value, 9);
+            $file = preg_replace('/[^a-zA-Z0-9._-]/', '', $file) ?? '';
+            $extension = strtolower((string) pathinfo($file, PATHINFO_EXTENSION));
+
+            return $file !== '' && in_array($extension, ['png', 'jpg', 'jpeg', 'webp'], true) ? 'module://' . $file : '';
+        }
+
+        return filter_var($value, FILTER_VALIDATE_URL) && str_starts_with(strtolower($value), 'https://') ? $value : '';
+    }
+
+    private function normaliseSourceUrl(string $value): string
+    {
+        $value = trim(strip_tags($value));
+
+        return filter_var($value, FILTER_VALIDATE_URL) && str_starts_with(strtolower($value), 'https://') ? $value : '';
     }
 
     private function normaliseSlug(string $slug): string

@@ -1,5 +1,87 @@
 # Changelog
 
+## 1.0.0-rc.1 — 2026-07-28
+
+### Added
+
+- Added a GitHub Actions quality workflow for PHP and JavaScript syntax checks.
+- Added a README screenshot gallery using bundled fictional-data illustrations.
+- Added `NOTICE.md` with attribution and modification details for official webtrees images.
+- Added release-candidate notes and a GitHub publication checklist.
+
+### Changed
+
+- Promoted the module from alpha development to the first 1.0.0 release candidate.
+- Updated repository, issue, release and latest-version links to `PottsNet/potts-help-centre`.
+- Clarified that the GitHub repository name may change while the internal `potts_member_help` identity must remain stable.
+- Added `noopener noreferrer` to links that open a new tab.
+- Added a no-referrer policy and asynchronous decoding to article and editor screenshot images.
+- Expanded installation, privacy, attribution and final regression-test documentation.
+
+### Compatibility
+
+- Retained the `potts_member_help` installation folder, namespace and storage identity.
+- No database migration is required when upgrading from an earlier release.
+
+## 0.6.0-alpha.2 — 2026-07-28
+
+### Added
+
+- Added eight annotated screen guides for quick search, individual-page tabs, sign-in, adding a partner, adding a child, correcting a name, adding media and adding a source citation.
+- Used fictional names and records throughout the new guides so no private family information is distributed.
+- Added the new guides to the bundled-image selector in the article editor.
+- Added screenshot metadata to the matching visitor and member starter articles.
+
+### Changed
+
+- Increased the illustrated starter-article coverage from four to twelve articles.
+- Added a new non-destructive screenshot upgrade pass so installations already running 0.6.0-alpha.1 receive the additional guides without replacing article text or existing images.
+- Clearly identify original screen guides as illustrations whose controls may vary by theme, permissions, language and enabled modules.
+
+## 0.6.0-alpha.1 — 2026-07-28
+
+### Added
+
+- Added optional article screenshots with accessible alternative text, captions and source attribution.
+- Added four compressed official webtrees illustrations covering the interactive tree, Facts and events place details, event maps and geographic-data editing.
+- Added a standard notice explaining that screens may vary by theme, access level and enabled modules.
+- Added screenshot controls to the article editor, including bundled-image suggestions and secure HTTPS image addresses.
+- Added illustrated-guide totals and screenshot badges to administration.
+- Added a non-destructive upgrade that applies bundled screenshot metadata to matching starter articles without replacing their edited instructions.
+
+### Changed
+
+- Bundled screenshots are stored as compressed WebP files to keep the module package small.
+- Screenshot images open at full size in a new tab and remain suitable for printing.
+
+## 0.5.0-alpha.2 — 2026-07-28
+
+### Changed
+
+- Corrected the public branding to **Potts Help Centre**, consistently using the established mixed-case Potts name.
+- Updated all user-facing documentation, administration labels and breadcrumbs to use **Potts** rather than the all-capital form.
+- Retained all internal module identifiers and the `potts_member_help` folder name for upgrade compatibility.
+
+## 0.5.0-alpha.1 — 2026-07-28
+
+### Changed
+
+- Renamed the displayed module from **Potts Member Help Centre** to **Potts Help Centre** because it supports visitors as well as registered members.
+- Shortened the public menu label to **Help** while keeping audience-specific Visitor Help Centre and Member Help Centre page titles.
+- Retained the `potts_member_help` folder and storage identity so existing installations upgrade without losing content or settings.
+- Reworked the landing page to prioritise Quick help and topic browsing instead of displaying every article immediately.
+- Improved multi-word search with relevance ranking across titles, summaries, category names and article content.
+
+### Added
+
+- Added administrator-selectable Quick help articles with a one-time, non-destructive upgrade for existing installations.
+- Added category and search result counts.
+- Added article reading time, automatic table of contents, print guide, copy link and previous/next navigation.
+- Added browser-session awareness for feedback already submitted.
+- Added an administration dashboard with publication, audience, featured and feedback summaries.
+- Added instant administration filters for article text, audience, status and Quick help.
+- Added an Articles to review panel based on aggregate “Not quite” ratings.
+
 ## 0.4.0-alpha.4 — 2026-07-25
 
 ### Changed
@@ -145,7 +227,7 @@
 
 ### Changed
 
-- Control-panel name changed to **POTTS Member Help Centre**.
+- Control-panel name changed to **Potts Member Help Centre**.
 - Menu access should now be configured at Visitor level so the same module is available to both audiences.
 - Public routes filter content by tree membership rather than redirecting every guest to sign-in.
 

@@ -7,6 +7,7 @@
 /** @var array<string,string> $moduleRequirements */
 /** @var array<string,bool> $moduleStatus */
 /** @var bool $richTextEditorAvailable */
+/** @var string $screenshotUrl */
 $groupedCategories = ['visitors' => [], 'members' => []];
 foreach ($categories as $key => $details) {
     $groupedCategories[$details['group'] ?? 'members'][$key] = $details;
@@ -27,7 +28,7 @@ $previewUrl = $article->block_id > 0 && $article->published && trim((string) $ar
 
 <?= view('components/breadcrumbs', ['links' => [
     route(\Fisharebest\Webtrees\Http\RequestHandlers\ControlPanel::class) => \Fisharebest\Webtrees\I18N::translate('Control panel'),
-    route('module', ['module' => $moduleName, 'action' => 'Admin', 'tree' => $tree->name()]) => \Fisharebest\Webtrees\I18N::translate('POTTS Member Help Centre'),
+    route('module', ['module' => $moduleName, 'action' => 'Admin', 'tree' => $tree->name()]) => \Fisharebest\Webtrees\I18N::translate('Potts Help Centre'),
     $title,
 ]]) ?>
 
@@ -72,6 +73,60 @@ $previewUrl = $article->block_id > 0 && $article->published && trim((string) $ar
                             <?= e(\Fisharebest\Webtrees\I18N::translate('Use the toolbar for headings, bold text, numbered steps, bullet lists, links, tables and images. Use Source when you need to inspect or adjust the HTML. Content is sanitised when saved.')) ?>
                         </div>
                     </div>
+
+                    <div class="border rounded p-3 mb-3">
+                        <h2 class="h5 mb-3"><?= e(\Fisharebest\Webtrees\I18N::translate('Article screenshot')) ?></h2>
+                        <p class="text-muted"><?= e(\Fisharebest\Webtrees\I18N::translate('Screenshots are optional. Written instructions should remain complete because themes, permissions and enabled modules can change what each user sees.')) ?></p>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="pmh-screenshot"><?= e(\Fisharebest\Webtrees\I18N::translate('Screenshot image')) ?></label>
+                            <input class="form-control" id="pmh-screenshot" name="screenshot" list="pmh-bundled-screenshots" value="<?= e((string) ($article->screenshot ?? '')) ?>" placeholder="module://interactive-tree.webp or https://…">
+                            <datalist id="pmh-bundled-screenshots">
+                                <option value="module://interactive-tree.webp"><?= e(\Fisharebest\Webtrees\I18N::translate('Interactive tree')) ?></option>
+                                <option value="module://facts-and-events-place.webp"><?= e(\Fisharebest\Webtrees\I18N::translate('Facts and events place details')) ?></option>
+                                <option value="module://event-map.webp"><?= e(\Fisharebest\Webtrees\I18N::translate('Event map')) ?></option>
+                                <option value="module://edit-location.webp"><?= e(\Fisharebest\Webtrees\I18N::translate('Edit a geographic location')) ?></option>
+                                <option value="module://quick-search-guide.webp"><?= e(\Fisharebest\Webtrees\I18N::translate('Find a person')) ?></option>
+                                <option value="module://individual-tabs-guide.webp"><?= e(\Fisharebest\Webtrees\I18N::translate('Individual-page tabs')) ?></option>
+                                <option value="module://sign-in-guide.webp"><?= e(\Fisharebest\Webtrees\I18N::translate('Sign in or reset a password')) ?></option>
+                                <option value="module://add-partner-guide.webp"><?= e(\Fisharebest\Webtrees\I18N::translate('Add a partner')) ?></option>
+                                <option value="module://add-child-guide.webp"><?= e(\Fisharebest\Webtrees\I18N::translate('Add a child')) ?></option>
+                                <option value="module://edit-name-guide.webp"><?= e(\Fisharebest\Webtrees\I18N::translate('Edit a name')) ?></option>
+                                <option value="module://media-upload-guide.webp"><?= e(\Fisharebest\Webtrees\I18N::translate('Add media')) ?></option>
+                                <option value="module://source-citation-guide.webp"><?= e(\Fisharebest\Webtrees\I18N::translate('Add a source citation')) ?></option>
+                            </datalist>
+                            <div class="form-text"><?= e(\Fisharebest\Webtrees\I18N::translate('Choose a bundled image or enter a secure HTTPS image address. Leave blank for no screenshot.')) ?></div>
+                        </div>
+
+                        <?php if ($screenshotUrl !== '') : ?>
+                            <figure class="pmh-editor-screenshot-preview">
+                                <img src="<?= e($screenshotUrl) ?>" alt="<?= e((string) ($article->screenshot_alt ?? '')) ?>" decoding="async" referrerpolicy="no-referrer">
+                                <figcaption><?= e(\Fisharebest\Webtrees\I18N::translate('Current saved screenshot preview')) ?></figcaption>
+                            </figure>
+                        <?php endif ?>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="pmh-screenshot-alt"><?= e(\Fisharebest\Webtrees\I18N::translate('Alternative text')) ?></label>
+                            <input class="form-control" id="pmh-screenshot-alt" name="screenshot_alt" value="<?= e((string) ($article->screenshot_alt ?? '')) ?>" maxlength="250">
+                            <div class="form-text"><?= e(\Fisharebest\Webtrees\I18N::translate('Describe what the screenshot shows for users who cannot see the image.')) ?></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="pmh-screenshot-caption"><?= e(\Fisharebest\Webtrees\I18N::translate('Caption')) ?></label>
+                            <input class="form-control" id="pmh-screenshot-caption" name="screenshot_caption" value="<?= e((string) ($article->screenshot_caption ?? '')) ?>" maxlength="300">
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label" for="pmh-screenshot-source"><?= e(\Fisharebest\Webtrees\I18N::translate('Source label')) ?></label>
+                                <input class="form-control" id="pmh-screenshot-source" name="screenshot_source" value="<?= e((string) ($article->screenshot_source ?? '')) ?>" placeholder="Official webtrees website">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="pmh-screenshot-source-url"><?= e(\Fisharebest\Webtrees\I18N::translate('Source address')) ?></label>
+                                <input class="form-control" id="pmh-screenshot-source-url" name="screenshot_source_url" value="<?= e((string) ($article->screenshot_source_url ?? '')) ?>" placeholder="https://…">
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -86,7 +141,7 @@ $previewUrl = $article->block_id > 0 && $article->published && trim((string) $ar
                                 <option value="<?= e($key) ?>" <?= $article->audience === $key ? 'selected' : '' ?>><?= e($label) ?></option>
                             <?php endforeach ?>
                         </select>
-                        <div class="form-text"><?= e(\Fisharebest\Webtrees\I18N::translate('Visitors are not signed in. Registered members have membership access to this family tree. Everyone is shown in both help centres.')) ?></div>
+                        <div class="form-text"><?= e(\Fisharebest\Webtrees\I18N::translate('Visitors are not signed in. Registered members have membership access to this family tree. Everyone appears in both audience views.')) ?></div>
                     </div>
 
                     <div class="mb-3">
@@ -133,13 +188,19 @@ $previewUrl = $article->block_id > 0 && $article->published && trim((string) $ar
                     </div>
 
                     <div class="form-check mb-3">
+                        <input class="form-check-input" id="pmh-featured" type="checkbox" name="featured" value="1" <?= (bool) ($article->featured ?? false) ? 'checked' : '' ?>>
+                        <label class="form-check-label" for="pmh-featured"><?= e(\Fisharebest\Webtrees\I18N::translate('Show in Quick help')) ?></label>
+                        <div class="form-text"><?= e(\Fisharebest\Webtrees\I18N::translate('Featured articles appear near the top of the help centre for their selected audience.')) ?></div>
+                    </div>
+
+                    <div class="form-check mb-3">
                         <input class="form-check-input" id="pmh-published" type="checkbox" name="published" value="1" <?= $article->published ? 'checked' : '' ?>>
                         <label class="form-check-label" for="pmh-published"><?= e(\Fisharebest\Webtrees\I18N::translate('Published')) ?></label>
                     </div>
 
                     <button class="btn btn-primary w-100" type="submit"><?= e(\Fisharebest\Webtrees\I18N::translate('Save')) ?></button>
                     <?php if ($previewUrl !== '') : ?>
-                        <a class="btn btn-outline-secondary w-100 mt-2" href="<?= e($previewUrl) ?>" target="_blank" rel="noopener"><?= e(\Fisharebest\Webtrees\I18N::translate('View saved article')) ?></a>
+                        <a class="btn btn-outline-secondary w-100 mt-2" href="<?= e($previewUrl) ?>" target="_blank" rel="noopener noreferrer"><?= e(\Fisharebest\Webtrees\I18N::translate('View saved article')) ?></a>
                     <?php endif ?>
                     <a class="btn btn-link w-100 mt-2" href="<?= e(route('module', ['module' => $moduleName, 'action' => 'Admin', 'tree' => $tree->name()])) ?>"><?= e(\Fisharebest\Webtrees\I18N::translate('Cancel')) ?></a>
                 </div>

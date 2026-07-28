@@ -1,8 +1,13 @@
 <?php
 /** @var \Illuminate\Support\Collection<int,object> $articles */
+/** @var \Illuminate\Support\Collection<int,object> $quickHelp */
 /** @var array<string,array{title:string,description:string,group:string}> $categories */
+/** @var array<string,int> $categoryCounts */
 /** @var string $category */
 /** @var string $query */
+/** @var int $resultCount */
+/** @var int $totalCount */
+/** @var bool $showAll */
 /** @var string $eyebrow */
 /** @var string $intro */
 /** @var string $searchPlaceholder */
@@ -24,9 +29,10 @@ $articleRoute = static fn (string $slug): string => route('module', array_merge(
     'tree' => $tree->name(),
     'slug' => $slug,
 ], $audienceParameters));
+$landingPage = $query === '' && $category === '' && !$showAll;
 ?>
 
-<div class="wt-page-content wt-member-help">
+<div class="wt-page-content wt-member-help wt-help-centre">
     <?php if ($audienceQuery !== '') : ?>
         <div class="alert alert-warning d-flex flex-wrap justify-content-between align-items-center gap-2">
             <span><?= e(\Fisharebest\Webtrees\I18N::translate('Administrator preview: you are viewing the %s help experience.', $audience === 'visitors' ? 'visitor' : 'member')) ?></span>
@@ -43,66 +49,115 @@ $articleRoute = static fn (string $slug): string => route('module', array_merge(
 
         <form class="pmh-search" method="get" action="<?= e($showRoute()) ?>">
             <?php if ($audienceQuery !== '') : ?><input type="hidden" name="audience" value="<?= e($audienceQuery) ?>"><?php endif ?>
+            <?php if ($category !== '') : ?><input type="hidden" name="category" value="<?= e($category) ?>"><?php endif ?>
             <label class="visually-hidden" for="pmh-search"><?= e(\Fisharebest\Webtrees\I18N::translate('Search the help centre')) ?></label>
-            <input id="pmh-search" class="form-control" type="search" name="q" value="<?= e($query) ?>" placeholder="<?= e($searchPlaceholder) ?>">
+            <input id="pmh-search" class="form-control" type="search" name="q" value="<?= e($query) ?>" placeholder="<?= e($searchPlaceholder) ?>" autocomplete="off">
             <button class="btn btn-primary" type="submit"><?= e(\Fisharebest\Webtrees\I18N::translate('Search')) ?></button>
         </form>
+        <?php if ($category !== '') : ?>
+            <p class="pmh-search-scope">
+                <?= e(\Fisharebest\Webtrees\I18N::translate('Searching within: %s', $categories[$category]['title'] ?? $category)) ?>
+                <a href="<?= e($showRoute()) ?>"><?= e(\Fisharebest\Webtrees\I18N::translate('Search all topics')) ?></a>
+            </p>
+        <?php endif ?>
     </header>
 
-    <?php if ($query === '' && $category === '') : ?>
-        <section aria-labelledby="pmh-categories-title">
-            <h2 id="pmh-categories-title"><?= e(\Fisharebest\Webtrees\I18N::translate('Browse by topic')) ?></h2>
-            <div class="pmh-category-grid">
-                <?php foreach ($categories as $key => $details) : ?>
-                    <a class="pmh-category-card" href="<?= e($showRoute(['category' => $key])) ?>">
-                        <span class="pmh-category-title"><?= e($details['title']) ?></span>
-                        <span><?= e($details['description']) ?></span>
+    <?php if ($landingPage && $quickHelp->isNotEmpty()) : ?>
+        <section class="pmh-quick-help" aria-labelledby="pmh-quick-title">
+            <div class="pmh-section-heading">
+                <div>
+                    <p class="pmh-eyebrow"><?= e(\Fisharebest\Webtrees\I18N::translate('Start here')) ?></p>
+                    <h2 id="pmh-quick-title"><?= e($audience === 'visitors' ? \Fisharebest\Webtrees\I18N::translate('Popular visitor help') : \Fisharebest\Webtrees\I18N::translate('Common editing tasks')) ?></h2>
+                </div>
+            </div>
+            <div class="pmh-quick-grid">
+                <?php foreach ($quickHelp as $article) : ?>
+                    <a class="pmh-quick-card" href="<?= e($articleRoute($article->slug)) ?>">
+                        <span class="pmh-quick-card__icon" aria-hidden="true">?</span>
+                        <span class="pmh-quick-card__content">
+                            <strong><?= e($article->title) ?></strong>
+                            <span><?= e($article->summary) ?></span>
+                        </span>
+                        <span class="pmh-quick-card__arrow" aria-hidden="true">›</span>
                     </a>
                 <?php endforeach ?>
             </div>
         </section>
     <?php endif ?>
 
-    <section class="pmh-article-list" aria-labelledby="pmh-articles-title">
-        <div class="pmh-section-heading">
-            <div>
-                <h2 id="pmh-articles-title">
-                    <?php if ($query !== '') : ?>
-                        <?= e(\Fisharebest\Webtrees\I18N::translate('Search results')) ?>
-                    <?php elseif ($category !== '' && isset($categories[$category])) : ?>
-                        <?= e($categories[$category]['title']) ?>
-                    <?php else : ?>
-                        <?= e(\Fisharebest\Webtrees\I18N::translate('All help articles')) ?>
-                    <?php endif ?>
-                </h2>
-                <?php if ($query !== '') : ?>
-                    <p><?= e(\Fisharebest\Webtrees\I18N::translate('Results for “%s”', $query)) ?></p>
-                <?php endif ?>
+    <?php if ($landingPage) : ?>
+        <section class="pmh-browse" aria-labelledby="pmh-categories-title">
+            <div class="pmh-section-heading">
+                <div>
+                    <p class="pmh-eyebrow"><?= e(\Fisharebest\Webtrees\I18N::translate('Explore the guide')) ?></p>
+                    <h2 id="pmh-categories-title"><?= e(\Fisharebest\Webtrees\I18N::translate('Browse by topic')) ?></h2>
+                </div>
             </div>
-            <?php if ($query !== '' || $category !== '') : ?>
-                <a class="btn btn-outline-secondary" href="<?= e($showRoute()) ?>"><?= e(\Fisharebest\Webtrees\I18N::translate('Clear filter')) ?></a>
-            <?php endif ?>
-        </div>
-
-        <?php if ($articles->isEmpty()) : ?>
-            <div class="alert alert-info"><?= e(\Fisharebest\Webtrees\I18N::translate('No help articles matched your search. Try fewer words or browse a topic.')) ?></div>
-        <?php else : ?>
-            <div class="pmh-list-grid">
-                <?php foreach ($articles as $article) : ?>
-                    <article class="pmh-article-card">
-                        <div class="pmh-card-meta">
-                            <span class="pmh-topic"><?= e($categories[$article->category]['title'] ?? $article->category) ?></span>
-                            <?php $requiredModules = trim((string) ($article->requires_modules ?? '')) === '' ? [] : array_values(array_filter(array_map('trim', explode(',', (string) $article->requires_modules)))); ?>
-                            <?php foreach ($requiredModules as $requiredModule) : ?>
-                                <span class="pmh-feature-badge"><?= e($moduleRequirements[$requiredModule] ?? $requiredModule) ?></span>
-                            <?php endforeach ?>
-                        </div>
-                        <h3><a href="<?= e($articleRoute($article->slug)) ?>"><?= e($article->title) ?></a></h3>
-                        <p><?= e($article->summary) ?></p>
-                        <a class="pmh-read-link" href="<?= e($articleRoute($article->slug)) ?>"><?= e(\Fisharebest\Webtrees\I18N::translate('Read instructions')) ?></a>
-                    </article>
+            <div class="pmh-category-grid">
+                <?php foreach ($categories as $key => $details) : ?>
+                    <a class="pmh-category-card" href="<?= e($showRoute(['category' => $key])) ?>">
+                        <span class="pmh-category-card__top">
+                            <span class="pmh-category-title"><?= e($details['title']) ?></span>
+                            <span class="pmh-count-badge"><?= e((string) ($categoryCounts[$key] ?? 0)) ?></span>
+                        </span>
+                        <span><?= e($details['description']) ?></span>
+                    </a>
                 <?php endforeach ?>
             </div>
-        <?php endif ?>
-    </section>
+            <div class="pmh-view-all">
+                <a class="btn btn-outline-primary" href="<?= e($showRoute(['view' => 'all'])) ?>"><?= e(\Fisharebest\Webtrees\I18N::translate('View all %s help articles', (string) $totalCount)) ?></a>
+            </div>
+        </section>
+    <?php endif ?>
+
+    <?php if (!$landingPage) : ?>
+        <section class="pmh-article-list" aria-labelledby="pmh-articles-title">
+            <div class="pmh-section-heading">
+                <div>
+                    <h2 id="pmh-articles-title">
+                        <?php if ($query !== '') : ?>
+                            <?= e(\Fisharebest\Webtrees\I18N::translate('Search results')) ?>
+                        <?php elseif ($category !== '' && isset($categories[$category])) : ?>
+                            <?= e($categories[$category]['title']) ?>
+                        <?php else : ?>
+                            <?= e(\Fisharebest\Webtrees\I18N::translate('All help articles')) ?>
+                        <?php endif ?>
+                    </h2>
+                    <p class="pmh-results-summary">
+                        <?php if ($query !== '') : ?>
+                            <?= e(\Fisharebest\Webtrees\I18N::plural('%s result for “%s”', '%s results for “%s”', $resultCount, (string) $resultCount, $query)) ?>
+                        <?php else : ?>
+                            <?= e(\Fisharebest\Webtrees\I18N::plural('%s article', '%s articles', $resultCount, (string) $resultCount)) ?>
+                        <?php endif ?>
+                    </p>
+                </div>
+                <a class="btn btn-outline-secondary" href="<?= e($showRoute()) ?>"><?= e(\Fisharebest\Webtrees\I18N::translate('Back to help centre')) ?></a>
+            </div>
+
+            <?php if ($articles->isEmpty()) : ?>
+                <div class="pmh-empty-state">
+                    <h3><?= e(\Fisharebest\Webtrees\I18N::translate('No matching help article')) ?></h3>
+                    <p><?= e(\Fisharebest\Webtrees\I18N::translate('Try fewer words, a different spelling or browse the topic cards instead.')) ?></p>
+                    <a class="btn btn-primary" href="<?= e($showRoute()) ?>"><?= e(\Fisharebest\Webtrees\I18N::translate('Browse all topics')) ?></a>
+                </div>
+            <?php else : ?>
+                <div class="pmh-list-grid">
+                    <?php foreach ($articles as $article) : ?>
+                        <article class="pmh-article-card">
+                            <div class="pmh-card-meta">
+                                <span class="pmh-topic"><?= e($categories[$article->category]['title'] ?? $article->category) ?></span>
+                                <?php $requiredModules = trim((string) ($article->requires_modules ?? '')) === '' ? [] : array_values(array_filter(array_map('trim', explode(',', (string) $article->requires_modules)))); ?>
+                                <?php foreach ($requiredModules as $requiredModule) : ?>
+                                    <span class="pmh-feature-badge"><?= e($moduleRequirements[$requiredModule] ?? $requiredModule) ?></span>
+                                <?php endforeach ?>
+                            </div>
+                            <h3><a href="<?= e($articleRoute($article->slug)) ?>"><?= e($article->title) ?></a></h3>
+                            <p><?= e($article->summary) ?></p>
+                            <a class="pmh-read-link" href="<?= e($articleRoute($article->slug)) ?>"><?= e(\Fisharebest\Webtrees\I18N::translate('Read instructions')) ?> <span aria-hidden="true">›</span></a>
+                        </article>
+                    <?php endforeach ?>
+                </div>
+            <?php endif ?>
+        </section>
+    <?php endif ?>
 </div>

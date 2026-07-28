@@ -54,7 +54,13 @@ return array (
     'summary' => 'Search by name and use relatives, dates and places to identify the correct person.',
     'published' => true,
     'audience' => 'visitors',
+    'featured' => true,
     'requires_modules' => '',
+    'screenshot' => 'module://quick-search-guide.webp',
+    'screenshot_alt' => 'Annotated example of the webtrees quick search field and suggested person and family results.',
+    'screenshot_caption' => 'Begin with a name, then compare dates, places and relatives before opening a result.',
+    'screenshot_source' => 'Potts Help Centre illustrated guide based on webtrees 2.2',
+    'screenshot_source_url' => 'https://dev.webtrees.net/',
     'body' => '<ol>
 <li>Open the main search box and begin typing a surname or full name.</li>
 <li>Select a suggested result, or open the full search page when no suitable result appears.</li>
@@ -94,7 +100,13 @@ return array (
     'summary' => 'Learn what Biography, Facts and events, Families, Album and other individual-page tabs are for.',
     'published' => true,
     'audience' => 'visitors',
+    'featured' => true,
     'requires_modules' => '',
+    'screenshot' => 'module://individual-tabs-guide.webp',
+    'screenshot_alt' => 'Annotated example of an individual page showing Biography, Facts and events, Families, Sources, Media and Interactive tree tabs.',
+    'screenshot_caption' => 'The available tabs and their position can vary with the theme, permissions and installed modules.',
+    'screenshot_source' => 'Potts Help Centre illustrated guide based on webtrees 2.2',
+    'screenshot_source_url' => 'https://dev.webtrees.net/',
     'body' => '<p>A person’s page can contain several tabs. The exact tabs depend on the site settings and installed modules.</p>
 <ul>
 <li><strong>Biography:</strong> a readable story assembled from the person’s visible records.</li>
@@ -170,6 +182,11 @@ return array (
 <li>notes, sources, media and age-at-event labels</li>
 </ul>
 <p>Use the tab’s display or options control to tick or untick available categories. The choices change the presentation only; they do not delete any genealogy records.</p>',
+    'screenshot' => 'module://facts-and-events-place.webp',
+    'screenshot_alt' => 'Birth, baptism and burial facts displayed in webtrees with place information and map links.',
+    'screenshot_caption' => 'Facts and events can display dates, places, map links and other details recorded for the person.',
+    'screenshot_source' => 'Official webtrees location guide',
+    'screenshot_source_url' => 'https://webtrees.net/faq/locations/',
   ),
   8 => 
   array (
@@ -199,6 +216,7 @@ return array (
     'summary' => 'Use webtrees charts to move beyond one person and see a wider part of the family.',
     'published' => true,
     'audience' => 'visitors',
+    'featured' => true,
     'requires_modules' => '',
     'body' => '<p>Charts are generated from the relationships recorded in webtrees.</p>
 <ul>
@@ -209,6 +227,11 @@ return array (
 <li><strong>Relationship chart:</strong> shows a path connecting two people where one can be found.</li>
 </ul>
 <p>Large trees may take longer to draw. Privacy rules still apply, so private people may appear as limited placeholders or may be omitted.</p>',
+    'screenshot' => 'module://interactive-tree.webp',
+    'screenshot_alt' => 'A webtrees interactive pedigree chart showing connected family members across several generations.',
+    'screenshot_caption' => 'An interactive tree gives a visual overview of ancestors and family connections. Names, colours and controls vary by theme.',
+    'screenshot_source' => 'Official webtrees website',
+    'screenshot_source_url' => 'https://webtrees.net/',
   ),
   10 => 
   array (
@@ -406,6 +429,11 @@ return array (
 <li>Places may use the historical name, a standard modern hierarchy or both.</li>
 </ul>
 <p>Conflicting records can be retained with notes and sources when the evidence is genuinely uncertain. A difference is not always a mistake.</p>',
+    'screenshot' => 'module://event-map.webp',
+    'screenshot_alt' => 'A webtrees map showing separate markers for a birth and burial near Milton Keynes.',
+    'screenshot_caption' => 'Place names and recorded coordinates can be used to display events on a map.',
+    'screenshot_source' => 'Official webtrees location guide',
+    'screenshot_source_url' => 'https://webtrees.net/faq/locations/',
   ),
   20 => 
   array (
@@ -480,6 +508,11 @@ return array (
     'published' => true,
     'audience' => 'visitors',
     'requires_modules' => '',
+    'screenshot' => 'module://sign-in-guide.webp',
+    'screenshot_alt' => 'Annotated example of a webtrees sign-in form with password reset and account request links.',
+    'screenshot_caption' => 'Use the password-reset link rather than creating a second account when access has been lost.',
+    'screenshot_source' => 'Potts Help Centre illustrated guide based on webtrees 2.2',
+    'screenshot_source_url' => 'https://dev.webtrees.net/',
     'body' => '<ol>
 <li>Open the sign-in page and enter the username or email address associated with your account.</li>
 <li>Enter the password carefully, including capital letters and symbols.</li>
@@ -497,6 +530,7 @@ return array (
     'summary' => 'Identify the exact person, explain the proposed change and provide evidence that can be reviewed.',
     'published' => true,
     'audience' => 'visitors',
+    'featured' => true,
     'requires_modules' => '',
     'body' => '<p>When reporting an error, include:</p>
 <ul>
@@ -678,7 +712,13 @@ return array (
     'summary' => 'Create or connect a spouse or partner through the Families tab rather than the Biography or a personal note.',
     'published' => true,
     'audience' => 'members',
+    'featured' => true,
     'requires_modules' => '',
+    'screenshot' => 'module://add-partner-guide.webp',
+    'screenshot_alt' => 'Annotated example of the Families tab and the action to add another spouse or partner.',
+    'screenshot_caption' => 'Add a partner through the Families tab and search for an existing person before creating a new record.',
+    'screenshot_source' => 'Potts Help Centre illustrated guide based on webtrees 2.2',
+    'screenshot_source_url' => 'https://dev.webtrees.net/',
     'body' => '<ol>
 <li>Open the person who already exists.</li>
 <li>Select the <strong>Families</strong> tab.</li>
@@ -718,7 +758,13 @@ return array (
     'summary' => 'Add a child to the correct parents or partner family and search before creating a duplicate.',
     'published' => true,
     'audience' => 'members',
+    'featured' => true,
     'requires_modules' => '',
+    'screenshot' => 'module://add-child-guide.webp',
+    'screenshot_alt' => 'Annotated example showing the Add a child action for a selected family and a new-child form.',
+    'screenshot_caption' => 'Make sure the correct family is selected and search for the child before creating a new individual.',
+    'screenshot_source' => 'Potts Help Centre illustrated guide based on webtrees 2.2',
+    'screenshot_source_url' => 'https://dev.webtrees.net/',
     'body' => '<ol>
 <li>Open either parent and select <strong>Families</strong>.</li>
 <li>Find the correct partner-family section.</li>
@@ -780,6 +826,11 @@ return array (
     'published' => true,
     'audience' => 'members',
     'requires_modules' => '',
+    'screenshot' => 'module://edit-name-guide.webp',
+    'screenshot_alt' => 'Annotated example of the edit menu and name fields including given names, surname, nickname and name type.',
+    'screenshot_caption' => 'Edit a documented error but use an additional name when both historical forms are supported.',
+    'screenshot_source' => 'Potts Help Centre illustrated guide based on webtrees 2.2',
+    'screenshot_source_url' => 'https://dev.webtrees.net/',
     'body' => '<ol>
 <li>Open the person and use the edit action for their name or personal details.</li>
 <li>Enter given names and surname in the fields or GEDCOM name format presented by webtrees.</li>
@@ -838,6 +889,7 @@ return array (
     'summary' => 'Use Facts and events to record a dated or descriptive part of a person’s life.',
     'published' => true,
     'audience' => 'members',
+    'featured' => true,
     'requires_modules' => '',
     'body' => '<ol>
 <li>Open the person’s <strong>Facts and events</strong> tab.</li>
@@ -930,6 +982,11 @@ return array (
 <li>Add map coordinates only when reasonably verified.</li>
 </ul>
 <p>Consistent places improve maps, place lists and the country-aware historical context used by Biography.</p>',
+    'screenshot' => 'module://edit-location.webp',
+    'screenshot_alt' => 'The webtrees geographic location editor showing a map, place field, latitude and longitude.',
+    'screenshot_caption' => 'The geographic-data screen is separate from the place text recorded in an individual event.',
+    'screenshot_source' => 'Official webtrees location guide',
+    'screenshot_source_url' => 'https://webtrees.net/faq/locations/',
   ),
   46 => 
   array (
@@ -1016,7 +1073,13 @@ return array (
     'summary' => 'Upload a media file, describe it clearly and link it to the correct person, family or event.',
     'published' => true,
     'audience' => 'members',
+    'featured' => true,
     'requires_modules' => '',
+    'screenshot' => 'module://media-upload-guide.webp',
+    'screenshot_alt' => 'Annotated example of a webtrees media upload form with file, title, type, date, privacy and description fields.',
+    'screenshot_caption' => 'Describe the item clearly and check privacy and permission before publishing it.',
+    'screenshot_source' => 'Potts Help Centre illustrated guide based on webtrees 2.2',
+    'screenshot_source_url' => 'https://dev.webtrees.net/',
     'body' => '<ol>
 <li>Open the person, family or event that the item illustrates.</li>
 <li>Select the media or add-media action.</li>
@@ -1116,7 +1179,13 @@ return array (
     'summary' => 'Record where a particular name, date, place, relationship or event came from.',
     'published' => true,
     'audience' => 'members',
+    'featured' => true,
     'requires_modules' => '',
+    'screenshot' => 'module://source-citation-guide.webp',
+    'screenshot_alt' => 'Annotated example of adding a source citation to a birth fact, with source, reference and evidence fields.',
+    'screenshot_caption' => 'Attach the citation to the particular fact or relationship it supports.',
+    'screenshot_source' => 'Potts Help Centre illustrated guide based on webtrees 2.2',
+    'screenshot_source_url' => 'https://dev.webtrees.net/',
     'body' => '<p>A <strong>source</strong> identifies the broader work or collection. A <strong>citation</strong> identifies the specific page, entry, certificate or item supporting the fact.</p>
 <ol>
 <li>Edit the fact, event, name or family record supported by the evidence.</li>
@@ -1411,6 +1480,7 @@ return array (
     'summary' => 'Editing access can depend on your account, the record’s privacy, the active tab and the selected theme.',
     'published' => true,
     'audience' => 'members',
+    'featured' => true,
     'requires_modules' => '',
     'body' => '<p>An edit button may be absent because:</p>
 <ul>

@@ -2,6 +2,9 @@
 /** @var object $article */
 /** @var array<string,array{title:string,description:string,group:string}> $categories */
 /** @var \Illuminate\Support\Collection<int,object> $related */
+/** @var object|null $previous */
+/** @var object|null $next */
+/** @var int $readingTime */
 /** @var string $helpTitle */
 /** @var string $audience */
 /** @var string $actualAudience */
@@ -9,7 +12,9 @@
 /** @var \Fisharebest\Webtrees\Tree $tree */
 /** @var string $moduleName */
 /** @var array<string,string> $moduleRequirements */
+/** @var bool $feedbackGiven */
 /** @var bool $feedbackRecorded */
+/** @var string $screenshotUrl */
 $categoryTitle = $categories[$article->category]['title'] ?? $article->category;
 $requiredModules = trim((string) ($article->requires_modules ?? '')) === '' ? [] : array_values(array_filter(array_map('trim', explode(',', (string) $article->requires_modules))));
 $audienceParameters = $audienceQuery !== '' ? ['audience' => $audienceQuery] : [];
@@ -26,39 +31,93 @@ $articleRoute = static fn (string $slug): string => route('module', array_merge(
 ], $audienceParameters));
 ?>
 
-<div class="wt-page-content wt-member-help">
+<div class="wt-page-content wt-member-help wt-help-centre">
     <?php if ($audienceQuery !== '') : ?>
-        <div class="alert alert-warning d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <div class="alert alert-warning d-flex flex-wrap justify-content-between align-items-center gap-2 pmh-no-print">
             <span><?= e(\Fisharebest\Webtrees\I18N::translate('Administrator preview: you are viewing the %s help experience.', $audience === 'visitors' ? 'visitor' : 'member')) ?></span>
             <a class="btn btn-sm btn-outline-secondary" href="<?= e(route('module', ['module' => $moduleName, 'action' => 'Show', 'tree' => $tree->name()])) ?>"><?= e(\Fisharebest\Webtrees\I18N::translate('Return to normal view')) ?></a>
         </div>
     <?php endif ?>
 
-    <nav class="pmh-breadcrumb" aria-label="<?= e(\Fisharebest\Webtrees\I18N::translate('Breadcrumb')) ?>">
+    <nav class="pmh-breadcrumb pmh-no-print" aria-label="<?= e(\Fisharebest\Webtrees\I18N::translate('Breadcrumb')) ?>">
         <a href="<?= e($showRoute()) ?>"><?= e($helpTitle) ?></a>
         <span aria-hidden="true">/</span>
         <a href="<?= e($showRoute(['category' => $article->category])) ?>"><?= e($categoryTitle) ?></a>
     </nav>
 
     <div class="pmh-article-layout">
-        <article class="pmh-article-body">
+        <article class="pmh-article-body" data-pmh-article>
             <header>
                 <div class="pmh-card-meta">
                     <span class="pmh-topic"><?= e($categoryTitle) ?></span>
+                    <span class="pmh-reading-time"><?= e(\Fisharebest\Webtrees\I18N::plural('%s minute read', '%s minutes read', $readingTime, (string) $readingTime)) ?></span>
                     <?php foreach ($requiredModules as $requiredModule) : ?>
                         <span class="pmh-feature-badge"><?= e($moduleRequirements[$requiredModule] ?? $requiredModule) ?></span>
                     <?php endforeach ?>
                 </div>
                 <h1 class="pmh-article-title"><?= e($article->title) ?></h1>
                 <?php if ($article->summary !== '') : ?><p class="pmh-lead"><?= e($article->summary) ?></p><?php endif ?>
+                <div class="pmh-article-tools pmh-no-print">
+                    <button class="btn btn-sm btn-outline-secondary" type="button" data-pmh-print><?= e(\Fisharebest\Webtrees\I18N::translate('Print guide')) ?></button>
+                    <button class="btn btn-sm btn-outline-secondary" type="button" data-pmh-copy-link data-copy-label="<?= e(\Fisharebest\Webtrees\I18N::translate('Copy link')) ?>" data-copied-label="<?= e(\Fisharebest\Webtrees\I18N::translate('Link copied')) ?>"><?= e(\Fisharebest\Webtrees\I18N::translate('Copy link')) ?></button>
+                </div>
             </header>
-            <div class="pmh-rich-text"><?= $article->body ?></div>
 
-            <section class="pmh-feedback" id="pmh-feedback" aria-labelledby="pmh-feedback-heading">
+            <?php if ($screenshotUrl !== '') : ?>
+                <figure class="pmh-article-screenshot">
+                    <a href="<?= e($screenshotUrl) ?>" target="_blank" rel="noopener noreferrer" aria-label="<?= e(\Fisharebest\Webtrees\I18N::translate('Open the screenshot at full size')) ?>">
+                        <img src="<?= e($screenshotUrl) ?>" alt="<?= e((string) ($article->screenshot_alt ?? '')) ?>" loading="lazy" decoding="async" referrerpolicy="no-referrer">
+                    </a>
+                    <figcaption>
+                        <?php if (trim((string) ($article->screenshot_caption ?? '')) !== '') : ?>
+                            <span><?= e((string) $article->screenshot_caption) ?></span>
+                        <?php endif ?>
+                        <?php if (trim((string) ($article->screenshot_source ?? '')) !== '') : ?>
+                            <span class="pmh-screenshot-source">
+                                <?= e(\Fisharebest\Webtrees\I18N::translate('Source:')) ?>
+                                <?php if (trim((string) ($article->screenshot_source_url ?? '')) !== '') : ?>
+                                    <a href="<?= e((string) $article->screenshot_source_url) ?>" target="_blank" rel="noopener noreferrer"><?= e((string) $article->screenshot_source) ?></a>
+                                <?php else : ?>
+                                    <?= e((string) $article->screenshot_source) ?>
+                                <?php endif ?>
+                            </span>
+                        <?php endif ?>
+                    </figcaption>
+                </figure>
+                <p class="pmh-screen-difference-note">
+                    <?= e(\Fisharebest\Webtrees\I18N::translate('Your screen may look slightly different depending on the theme, your access level and the modules enabled on this website.')) ?>
+                </p>
+            <?php endif ?>
+
+            <div class="pmh-rich-text" data-pmh-rich-text><?= $article->body ?></div>
+
+            <?php if ($previous !== null || $next !== null) : ?>
+                <nav class="pmh-article-navigation pmh-no-print" aria-label="<?= e(\Fisharebest\Webtrees\I18N::translate('Help article navigation')) ?>">
+                    <?php if ($previous !== null) : ?>
+                        <a class="pmh-article-navigation__item" href="<?= e($articleRoute($previous->slug)) ?>">
+                            <span><?= e(\Fisharebest\Webtrees\I18N::translate('Previous')) ?></span>
+                            <strong>‹ <?= e($previous->title) ?></strong>
+                        </a>
+                    <?php else : ?><span></span><?php endif ?>
+                    <?php if ($next !== null) : ?>
+                        <a class="pmh-article-navigation__item pmh-article-navigation__item--next" href="<?= e($articleRoute($next->slug)) ?>">
+                            <span><?= e(\Fisharebest\Webtrees\I18N::translate('Next')) ?></span>
+                            <strong><?= e($next->title) ?> ›</strong>
+                        </a>
+                    <?php endif ?>
+                </nav>
+            <?php endif ?>
+
+            <section class="pmh-feedback pmh-no-print" id="pmh-feedback" aria-labelledby="pmh-feedback-heading">
                 <?php if ($feedbackRecorded) : ?>
                     <div class="pmh-feedback-thanks" role="status">
                         <h2 id="pmh-feedback-heading"><?= e(\Fisharebest\Webtrees\I18N::translate('Thank you for your feedback')) ?></h2>
                         <p><?= e(\Fisharebest\Webtrees\I18N::translate('Your response has been recorded and will help improve these instructions.')) ?></p>
+                    </div>
+                <?php elseif ($feedbackGiven) : ?>
+                    <div class="pmh-feedback-thanks" role="status">
+                        <h2 id="pmh-feedback-heading"><?= e(\Fisharebest\Webtrees\I18N::translate('Feedback already recorded')) ?></h2>
+                        <p><?= e(\Fisharebest\Webtrees\I18N::translate('You have already rated this article during this browser session.')) ?></p>
                     </div>
                 <?php elseif ($audienceQuery !== '') : ?>
                     <div>
@@ -80,7 +139,12 @@ $articleRoute = static fn (string $slug): string => route('module', array_merge(
             </section>
         </article>
 
-        <aside class="pmh-sidebar">
+        <aside class="pmh-sidebar pmh-no-print">
+            <div class="pmh-side-card pmh-toc-card" data-pmh-toc-card hidden>
+                <h2><?= e(\Fisharebest\Webtrees\I18N::translate('On this page')) ?></h2>
+                <nav data-pmh-toc aria-label="<?= e(\Fisharebest\Webtrees\I18N::translate('Article contents')) ?>"></nav>
+            </div>
+
             <div class="pmh-side-card">
                 <h2><?= e(\Fisharebest\Webtrees\I18N::translate('Need more help?')) ?></h2>
                 <?php if ($audience === 'visitors') : ?>
@@ -100,6 +164,8 @@ $articleRoute = static fn (string $slug): string => route('module', array_merge(
                     </ul>
                 </div>
             <?php endif ?>
+
+            <a class="pmh-back-to-centre" href="<?= e($showRoute()) ?>">‹ <?= e(\Fisharebest\Webtrees\I18N::translate('Back to help centre')) ?></a>
         </aside>
     </div>
 </div>

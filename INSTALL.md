@@ -1,58 +1,55 @@
 # Installation and upgrade
 
+## Release package
+
+Use the named GitHub release asset `potts_help_centre_v1.0.0-rc.1.zip`. Do not install GitHub’s automatic **Source code.zip** archive because it may not preserve the required enclosing module folder.
+
 ## New installation
 
-1. Extract `potts_member_help-0.4.0-alpha.4.zip`.
+1. Extract `potts_help_centre_v1.0.0-rc.1.zip`.
 2. Upload the enclosed `potts_member_help` folder to `modules_v4/`.
 3. Confirm the final path is `modules_v4/potts_member_help/module.php`.
 4. Open **Control panel → Modules → All modules**.
-5. Enable **POTTS Member Help Centre**.
+5. Enable **Potts Help Centre**.
 6. Open **Control panel → Modules → Menus**.
-7. Enable it for the required family tree and set the minimum access level to **Visitor**.
+7. Enable **Help** for the required family tree and set its minimum access level to **Visitor**.
 8. Open the module settings page once to create the editable starter articles.
 
-## Upgrade from 0.2.x
+## Upgrade from an earlier release
 
-1. Keep a backup of the existing `modules_v4/potts_member_help` folder.
-2. Replace that folder with the one from this ZIP.
-3. Do not delete database records or existing articles.
-4. Open **POTTS Member Help Centre** in the control panel.
-5. Review the optional-module status panel.
-6. Choose:
-   - **Add missing starter articles** for a non-destructive addition, or
-   - **Replace starter articles with latest guide** to install the complete revised wording.
+1. Back up the existing `modules_v4/potts_member_help` folder and database.
+2. Replace the existing folder with the `potts_member_help` folder from this release ZIP.
+3. Do not rename the installation folder and do not delete database records.
+4. Open **Potts Help Centre** in the control panel.
+5. Confirm the displayed version is `1.0.0-rc.1`.
+6. Review the dashboard and visitor/member previews.
+7. Clear the webtrees cache and hard-refresh the browser if older wording or styling remains visible.
 
-The replacement action updates articles whose link names match bundled starter articles. It preserves custom articles with other link names but overwrites edits made to matching starter articles.
+The display name and GitHub repository name do not change the internal module identity. Existing articles, settings, publication choices and feedback totals are retained.
+
+## Starter article choices
+
+On first use after upgrading, the module non-destructively marks bundled common-task articles for Quick help and assigns missing bundled screenshots. This does not replace article wording, existing custom screenshots or feedback.
+
+- **Add missing articles** adds only new link names and is non-destructive.
+- **Refresh starter guide** updates bundled articles with matching link names and adds any missing bundled articles.
+
+Refreshing overwrites edits made directly to bundled starter articles. Custom articles with other link names are preserved.
 
 ## Menu access
 
-Set the menu access to **Visitor**. Registered members also meet that minimum access level, and the module changes its menu label and content automatically after sign-in.
-
-## No database migration
-
-The module uses webtrees' existing block and block-setting storage. No SQL script or manual database change is required.
+Set the menu access level to **Visitor**. Registered members also meet this minimum access level. The public menu label is **Help** and the page content changes automatically after sign-in.
 
 ## Rich-text editor
 
-Keep the core **CKEditor™** module active under **Control panel → Modules → All modules** to use the visual article toolbar. If it is disabled, POTTS Member Help Centre safely falls back to a plain HTML editor.
+Keep the core **CKEditor™** module active to use the visual article toolbar. When it is disabled, the module safely falls back to a plain HTML editor.
 
-Upgrading to 0.4.0-alpha.4 does not require adding or replacing starter articles. Existing help content and feedback totals are retained. Contextual help is enabled by default and can be adjusted for each tree on the module settings page.
+## Database
 
+The module uses webtrees’ existing block and block-setting tables. No SQL script or manual database migration is required.
 
-## Upgrade from 0.4.0-alpha.3
+## Screenshot files and privacy
 
-1. Keep a backup of the existing `modules_v4/potts_member_help` folder.
-2. Replace it with the `potts_member_help` folder from this release.
-3. No database migration or starter-article refresh is required.
-4. Clear the webtrees cache and hard-refresh the browser so the revised theme-aware contextual styling is loaded.
+Keep `resources/screenshots/` when copying or updating the module. Bundled images are served from the module and are the preferred option.
 
-This release retains existing articles, publication settings and feedback totals.
-
-## Upgrade from 0.4.0-alpha.2
-
-1. Keep a backup of the existing `modules_v4/potts_member_help` folder.
-2. Replace it with the `potts_member_help` folder from this release.
-3. No database migration or starter-article refresh is required.
-4. Clear the browser cache if contextual help styling appears unchanged.
-
-This release retains existing articles, publication settings and feedback totals.
+Administrators may also enter a secure HTTPS image address. External images contact the remote server when displayed. Potts Help Centre applies `referrerpolicy="no-referrer"`, but administrators should still use a trusted host and avoid images containing private information.
