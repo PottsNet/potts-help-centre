@@ -8,6 +8,7 @@ use Fisharebest\Webtrees\Auth;
 use Fisharebest\Webtrees\FlashMessages;
 use Fisharebest\Webtrees\Http\Exceptions\HttpAccessDeniedException;
 use Fisharebest\Webtrees\Http\Exceptions\HttpNotFoundException;
+use Fisharebest\Webtrees\Http\RequestHandlers\ContactPage;
 use Fisharebest\Webtrees\Http\RequestHandlers\ControlPanel;
 use Fisharebest\Webtrees\I18N;
 use Fisharebest\Webtrees\Menu;
@@ -21,6 +22,7 @@ use Fisharebest\Webtrees\Module\ModuleMenuInterface;
 use Fisharebest\Webtrees\Module\ModuleMenuTrait;
 use Fisharebest\Webtrees\Registry;
 use Fisharebest\Webtrees\Services\HtmlService;
+use Fisharebest\Webtrees\Services\MessageService;
 use Fisharebest\Webtrees\Services\ModuleService;
 use Fisharebest\Webtrees\Services\TreeService;
 use Fisharebest\Webtrees\Site;
@@ -28,6 +30,7 @@ use Fisharebest\Webtrees\Tree;
 use Fisharebest\Webtrees\Validator;
 use Fisharebest\Webtrees\View;
 use Illuminate\Support\Collection;
+use Nyholm\Psr7\Response;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -45,6 +48,7 @@ use function in_array;
 use function is_array;
 use function is_file;
 use function is_string;
+use function json_decode;
 use function json_encode;
 use function mb_strtolower;
 use function preg_replace;
@@ -54,6 +58,7 @@ use function route;
 use function strip_tags;
 use function str_word_count;
 use function str_contains;
+use function str_replace;
 use function strtolower;
 use function strtok;
 use function trim;
@@ -64,7 +69,7 @@ final class PottsMemberHelp extends AbstractModule implements ModuleMenuInterfac
     use ModuleConfigTrait;
     use ModuleCustomTrait;
 
-    private const VERSION = '1.0.0-rc.1';
+    private const VERSION = '1.0.0-rc.2';
 
     private ?HelpRepository $repository = null;
 
@@ -178,7 +183,7 @@ final class PottsMemberHelp extends AbstractModule implements ModuleMenuInterfac
                 'forms' => $settings['forms'],
             ],
             'contexts' => $contexts,
-            'openGuideLabel' => I18N::translate('Open guide'),
+            'openGuideLabel' => I18N::translate('Help with this page'),
             'helpIconLabel' => I18N::translate('Help'),
         ];
 
@@ -195,14 +200,16 @@ final class PottsMemberHelp extends AbstractModule implements ModuleMenuInterfac
         $tree = Validator::attributes($request)->tree();
         $this->ensureFeaturedUpgrade($tree);
         $this->ensureScreenshotUpgrade($tree);
+        $this->ensureRc2ContentUpgrade($tree);
         [$audience, $actualAudience, $audienceQuery] = $this->resolveAudience($request, $tree);
+        $language = I18N::languageTag();
 
         $query = trim(Validator::queryParams($request)->string('q', ''));
         $category = trim(Validator::queryParams($request)->string('category', ''));
         $showAll = Validator::queryParams($request)->string('view', '') === 'all';
         $moduleStatus = $this->companionModuleStatus();
         $allArticles = $this->filterByAvailableModules(
-            $this->repository()->articlesForAudience($tree, $audience),
+            $this->repository()->articlesForAudience($tree, $audience, false, $language),
             $moduleStatus
         );
         $categories = $this->visibleCategories($allArticles);
@@ -245,24 +252,68 @@ final class PottsMemberHelp extends AbstractModule implements ModuleMenuInterfac
             'tree' => $tree,
             'moduleName' => $this->name(),
             'moduleRequirements' => $this->companionModules(),
+            'language' => $language,
+            'hasLanguageFallbacks' => $allArticles->contains(static fn (object $article): bool => (bool) ($article->is_language_fallback ?? false)),
         ]);
+    }
+
+    /**
+     * Handle search as POST and redirect back to the Help Centre. This preserves
+     * the module route on installations that do not use pretty URLs.
+     */
+    public function postSearchAction(ServerRequestInterface $request): ResponseInterface
+    {
+        $tree = Validator::attributes($request)->tree();
+        $parameters = [
+            'module' => $this->name(),
+            'action' => 'Show',
+            'tree' => $tree->name(),
+        ];
+
+        foreach (['q', 'category', 'audience'] as $name) {
+            $value = trim(Validator::parsedBody($request)->string($name, ''));
+            if ($value !== '') {
+                $parameters[$name] = $value;
+            }
+        }
+
+        return redirect(route('module', $parameters));
     }
 
     public function getArticleAction(ServerRequestInterface $request): ResponseInterface
     {
         $tree = Validator::attributes($request)->tree();
         $this->ensureScreenshotUpgrade($tree);
+        $this->ensureRc2ContentUpgrade($tree);
         [$audience, $actualAudience, $audienceQuery] = $this->resolveAudience($request, $tree);
+        $language = I18N::languageTag();
 
         $moduleStatus = $this->companionModuleStatus();
-        $visibleArticles = $this->filterByAvailableModules(
-            $this->repository()->articlesForAudience($tree, $audience),
+        $allAudienceVariants = $this->filterByAvailableModules(
+            $this->repository()->articlesForAudience($tree, $audience, false),
             $moduleStatus
         );
+        $visibleArticles = $this->repository()->selectLanguage($allAudienceVariants, $language);
         $slug = Validator::queryParams($request)->string('slug');
-        $article = $visibleArticles->first(static fn (object $item): bool => $item->slug === $slug);
-        if ($article === null) {
+        $requestedArticle = $allAudienceVariants->first(static fn (object $item): bool => $item->slug === $slug);
+        if ($requestedArticle === null) {
             throw new HttpNotFoundException(I18N::translate('This help article could not be found.'));
+        }
+        $translationKey = (string) ($requestedArticle->translation_key ?? $requestedArticle->slug);
+        $article = $visibleArticles->first(static fn (object $item): bool => (string) ($item->translation_key ?? $item->slug) === $translationKey)
+            ?? $requestedArticle;
+        if ($article->slug !== $slug) {
+            $parameters = [
+                'module' => $this->name(),
+                'action' => 'Article',
+                'tree' => $tree->name(),
+                'slug' => $article->slug,
+            ];
+            if ($audienceQuery !== '') {
+                $parameters['audience'] = $audienceQuery;
+            }
+
+            return redirect(route('module', $parameters));
         }
 
         $categories = $this->visibleCategories($visibleArticles);
@@ -296,6 +347,10 @@ final class PottsMemberHelp extends AbstractModule implements ModuleMenuInterfac
             'feedbackGiven' => $feedbackGiven,
             'feedbackRecorded' => $feedbackGiven && Validator::queryParams($request)->string('feedback', '') === 'recorded',
             'screenshotUrl' => $this->articleScreenshotUrl($article),
+            'resourceLinks' => $this->repository()->resourceLinks($article),
+            'officialResources' => $this->officialResources(),
+            'contactUrl' => $this->contactUrl($tree, $article),
+            'language' => $language,
         ]);
     }
 
@@ -313,7 +368,7 @@ final class PottsMemberHelp extends AbstractModule implements ModuleMenuInterfac
             ? HelpRepository::AUDIENCE_MEMBERS
             : HelpRepository::AUDIENCE_VISITORS;
         $visibleArticles = $this->filterByAvailableModules(
-            $this->repository()->articlesForAudience($tree, $audience),
+            $this->repository()->articlesForAudience($tree, $audience, false, I18N::languageTag()),
             $this->companionModuleStatus()
         );
         $article = $visibleArticles->first(static fn (object $item): bool => $item->slug === $slug);
@@ -370,11 +425,13 @@ final class PottsMemberHelp extends AbstractModule implements ModuleMenuInterfac
         $this->repository()->ensureSeeded($tree);
         $this->ensureFeaturedUpgrade($tree);
         $this->ensureScreenshotUpgrade($tree);
+        $this->ensureRc2ContentUpgrade($tree);
         $articles = $this->repository()->articles($tree, true);
         $publishedArticles = $articles->filter(static fn (object $article): bool => $article->published === true);
         $feedbackYes = (int) $articles->sum('feedback_yes');
         $feedbackNo = (int) $articles->sum('feedback_no');
         $feedbackResponses = $feedbackYes + $feedbackNo;
+        $languageCounts = $articles->groupBy('language')->map(static fn (Collection $items): int => $items->count())->sortKeys();
         $attentionArticles = $articles
             ->filter(static fn (object $article): bool => ((int) ($article->feedback_yes ?? 0) + (int) ($article->feedback_no ?? 0)) >= 2)
             ->sortByDesc(static function (object $article): float {
@@ -412,10 +469,12 @@ final class PottsMemberHelp extends AbstractModule implements ModuleMenuInterfac
                 'everyone' => $articles->where('audience', HelpRepository::AUDIENCE_EVERYONE)->count(),
                 'featured' => $articles->filter(static fn (object $article): bool => (bool) ($article->featured ?? false))->count(),
                 'screenshots' => $articles->filter(static fn (object $article): bool => trim((string) ($article->screenshot ?? '')) !== '')->count(),
+                'languages' => $languageCounts->count(),
                 'helpful_rate' => $feedbackResponses > 0 ? (int) round(($feedbackYes / $feedbackResponses) * 100) : null,
             ],
             'attentionArticles' => $attentionArticles,
             'contextualSettings' => $this->contextualHelpSettings($tree),
+            'languageCounts' => $languageCounts->all(),
         ]);
     }
 
@@ -500,6 +559,136 @@ final class PottsMemberHelp extends AbstractModule implements ModuleMenuInterfac
         ]));
     }
 
+    public function postAdminLanguageExportAction(ServerRequestInterface $request): ResponseInterface
+    {
+        $this->assertAdmin();
+        $tree = Validator::attributes($request)->tree();
+        $language = $this->repository()->normaliseLanguage(
+            Validator::parsedBody($request)->string('language', HelpRepository::DEFAULT_LANGUAGE)
+        );
+
+        $articles = $this->repository()->articles($tree, true)
+            ->filter(static fn (object $article): bool => (string) ($article->language ?? HelpRepository::DEFAULT_LANGUAGE) === $language)
+            ->map(fn (object $article): array => [
+                'title' => (string) $article->title,
+                'slug' => (string) $article->slug,
+                'translation_key' => (string) ($article->translation_key ?? $article->slug),
+                'language' => (string) ($article->language ?? HelpRepository::DEFAULT_LANGUAGE),
+                'category' => (string) $article->category,
+                'summary' => (string) $article->summary,
+                'body' => (string) $article->body,
+                'audience' => (string) $article->audience,
+                'requires_modules' => (string) ($article->requires_modules ?? ''),
+                'published' => (bool) $article->published,
+                'featured' => (bool) ($article->featured ?? false),
+                'screenshot' => (string) ($article->screenshot ?? ''),
+                'screenshot_alt' => (string) ($article->screenshot_alt ?? ''),
+                'screenshot_caption' => (string) ($article->screenshot_caption ?? ''),
+                'screenshot_source' => (string) ($article->screenshot_source ?? ''),
+                'screenshot_source_url' => (string) ($article->screenshot_source_url ?? ''),
+                'resource_links' => $this->repository()->resourceLinks($article),
+                'block_order' => (int) $article->block_order,
+            ])
+            ->values()
+            ->all();
+
+        $payload = [
+            'schema' => 'potts-help-centre-language-pack-v1',
+            'module_version' => self::VERSION,
+            'tree' => $tree->name(),
+            'language' => $language,
+            'articles' => $articles,
+        ];
+        $json = json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $filename = 'potts-help-centre-' . strtolower(str_replace('-', '_', $language)) . '.json';
+
+        return new Response(200, [
+            'Content-Type' => 'application/json; charset=utf-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'X-Content-Type-Options' => 'nosniff',
+        ], is_string($json) ? $json : '{}');
+    }
+
+    public function postAdminLanguageImportAction(ServerRequestInterface $request): ResponseInterface
+    {
+        $this->assertAdmin();
+        $tree = Validator::attributes($request)->tree();
+        $decoded = json_decode(Validator::parsedBody($request)->string('language_pack', ''), true);
+
+        if (!is_array($decoded) || ($decoded['schema'] ?? '') !== 'potts-help-centre-language-pack-v1' || !is_array($decoded['articles'] ?? null)) {
+            FlashMessages::addMessage(I18N::translate('The language pack is not valid.'), 'danger');
+
+            return redirect(route('module', ['module' => $this->name(), 'action' => 'Admin', 'tree' => $tree->name()]));
+        }
+
+        $packLanguage = $this->repository()->normaliseLanguage((string) ($decoded['language'] ?? HelpRepository::DEFAULT_LANGUAGE));
+        $existing = $this->repository()->articles($tree, true);
+        $added = 0;
+        $updated = 0;
+        $skipped = 0;
+
+        foreach ($decoded['articles'] as $item) {
+            if (!is_array($item)) {
+                ++$skipped;
+                continue;
+            }
+
+            $title = trim(strip_tags((string) ($item['title'] ?? '')));
+            $language = $this->repository()->normaliseLanguage((string) ($item['language'] ?? $packLanguage));
+            $translationKey = trim((string) ($item['translation_key'] ?? $item['slug'] ?? $title));
+            if ($title === '' || $translationKey === '') {
+                ++$skipped;
+                continue;
+            }
+            $normalisedTranslationKey = $this->repository()->normaliseTranslationKey($translationKey);
+
+            $matching = $existing->first(static fn (object $article): bool =>
+                (string) ($article->language ?? HelpRepository::DEFAULT_LANGUAGE) === $language
+                && (string) ($article->translation_key ?? $article->slug) === $normalisedTranslationKey
+            );
+            $blockId = $matching === null ? 0 : (int) $matching->block_id;
+            $slug = trim((string) ($item['slug'] ?? ''));
+            if ($slug === '') {
+                $slug = $translationKey . '-' . strtolower(str_replace('-', '_', $language));
+            }
+
+            $this->repository()->save($tree, [
+                'title' => $title,
+                'slug' => $slug,
+                'translation_key' => $translationKey,
+                'language' => $language,
+                'category' => (string) ($item['category'] ?? 'getting-started'),
+                'summary' => trim(strip_tags((string) ($item['summary'] ?? ''))),
+                'body' => $this->htmlService()->sanitize((string) ($item['body'] ?? '')),
+                'audience' => (string) ($item['audience'] ?? HelpRepository::AUDIENCE_MEMBERS),
+                'requires_modules' => $item['requires_modules'] ?? '',
+                'published' => !empty($item['published']),
+                'featured' => !empty($item['featured']),
+                'screenshot' => (string) ($item['screenshot'] ?? ''),
+                'screenshot_alt' => (string) ($item['screenshot_alt'] ?? ''),
+                'screenshot_caption' => (string) ($item['screenshot_caption'] ?? ''),
+                'screenshot_source' => (string) ($item['screenshot_source'] ?? ''),
+                'screenshot_source_url' => (string) ($item['screenshot_source_url'] ?? ''),
+                'resource_links' => is_array($item['resource_links'] ?? null) ? $item['resource_links'] : [],
+                'block_order' => max(1, (int) ($item['block_order'] ?? $this->repository()->nextOrder($tree))),
+            ], $blockId);
+
+            if ($blockId > 0) {
+                ++$updated;
+            } else {
+                ++$added;
+            }
+            $existing = $this->repository()->articles($tree, true);
+        }
+
+        FlashMessages::addMessage(
+            I18N::translate('%s translated articles were added, %s were updated and %s were skipped.', (string) $added, (string) $updated, (string) $skipped),
+            'success'
+        );
+
+        return redirect(route('module', ['module' => $this->name(), 'action' => 'Admin', 'tree' => $tree->name()]));
+    }
+
     public function getAdminEditAction(ServerRequestInterface $request): ResponseInterface
     {
         $this->assertAdmin();
@@ -532,6 +721,9 @@ final class PottsMemberHelp extends AbstractModule implements ModuleMenuInterfac
                 'screenshot_caption' => '',
                 'screenshot_source' => '',
                 'screenshot_source_url' => '',
+                'language' => HelpRepository::DEFAULT_LANGUAGE,
+                'translation_key' => '',
+                'resource_links' => '[]',
             ];
         }
 
@@ -546,6 +738,8 @@ final class PottsMemberHelp extends AbstractModule implements ModuleMenuInterfac
             'moduleStatus' => $this->companionModuleStatus(),
             'richTextEditorAvailable' => $this->richTextEditorAvailable(),
             'screenshotUrl' => $this->articleScreenshotUrl($article),
+            'translationArticles' => $this->repository()->articles($tree, true),
+            'resourceLinksText' => $this->resourceLinksToText($this->repository()->resourceLinks($article)),
         ]);
     }
 
@@ -582,6 +776,7 @@ final class PottsMemberHelp extends AbstractModule implements ModuleMenuInterfac
 
         $body = $this->htmlService()->sanitize(Validator::parsedBody($request)->string('body'));
         $summary = trim(strip_tags(Validator::parsedBody($request)->string('summary')));
+        $resourceLinks = $this->parseResourceLinksText(Validator::parsedBody($request)->string('resource_links', ''));
 
         $this->repository()->save($tree, [
             'title' => $title,
@@ -598,6 +793,9 @@ final class PottsMemberHelp extends AbstractModule implements ModuleMenuInterfac
             'screenshot_caption' => Validator::parsedBody($request)->string('screenshot_caption', ''),
             'screenshot_source' => Validator::parsedBody($request)->string('screenshot_source', ''),
             'screenshot_source_url' => Validator::parsedBody($request)->string('screenshot_source_url', ''),
+            'language' => Validator::parsedBody($request)->string('language', HelpRepository::DEFAULT_LANGUAGE),
+            'translation_key' => Validator::parsedBody($request)->string('translation_key', Validator::parsedBody($request)->string('slug', $title)),
+            'resource_links' => $resourceLinks,
             'block_order' => Validator::parsedBody($request)->integer('block_order', 1),
         ], $blockId);
 
@@ -752,9 +950,20 @@ final class PottsMemberHelp extends AbstractModule implements ModuleMenuInterfac
         $this->setPreference($preference, '1');
     }
 
+    private function ensureRc2ContentUpgrade(Tree $tree): void
+    {
+        $preference = 'content_upgrade_100_rc2_' . $tree->id();
+        if ($this->getPreference($preference, '0') === '1') {
+            return;
+        }
+
+        $this->repository()->seedRc2Enhancements($tree);
+        $this->setPreference($preference, '1');
+    }
+
     private function ensureScreenshotUpgrade(Tree $tree): void
     {
-        $preference = 'screenshot_upgrade_060_alpha2_' . $tree->id();
+        $preference = 'screenshot_upgrade_100_rc2_' . $tree->id();
         if ($this->getPreference($preference, '0') === '1') {
             return;
         }
@@ -875,25 +1084,26 @@ final class PottsMemberHelp extends AbstractModule implements ModuleMenuInterfac
     private function contextualHelpLinks(Tree $tree, string $audience): array
     {
         $articles = $this->filterByAvailableModules(
-            $this->repository()->articlesForAudience($tree, $audience),
+            $this->repository()->articlesForAudience($tree, $audience, false, I18N::languageTag()),
             $this->companionModuleStatus()
-        )->keyBy('slug');
+        )->keyBy('translation_key');
 
         $definitions = $this->contextualDefinitions($audience);
         $links = [];
 
         foreach ($definitions as $context => $definition) {
-            $slug = $definition['slug'];
-            if (!$articles->has($slug)) {
+            $translationKey = $definition['slug'];
+            if (!$articles->has($translationKey)) {
                 continue;
             }
 
+            $article = $articles->get($translationKey);
             $links[$context] = [
                 'url' => route('module', [
                     'module' => $this->name(),
                     'action' => 'Article',
                     'tree' => $tree->name(),
-                    'slug' => $slug,
+                    'slug' => $article->slug,
                 ]),
                 'message' => $definition['message'],
                 'label' => $definition['label'],
@@ -1000,6 +1210,71 @@ final class PottsMemberHelp extends AbstractModule implements ModuleMenuInterfac
                 'label' => I18N::translate('Historical context help'),
             ],
         ];
+    }
+
+    /** @return list<array{label:string,url:string}> */
+    private function officialResources(): array
+    {
+        return [
+            ['label' => I18N::translate('Official webtrees user documentation'), 'url' => 'https://webtrees.net/user/'],
+            ['label' => I18N::translate('Official webtrees frequently asked questions'), 'url' => 'https://webtrees.net/faq/'],
+            ['label' => I18N::translate('webtrees community forum'), 'url' => 'https://webtrees.net/forum/'],
+        ];
+    }
+
+    private function contactUrl(Tree $tree, object $article): string
+    {
+        $contacts = Registry::container()->get(MessageService::class)->validContacts($tree);
+        $contact = $contacts[0] ?? null;
+        if ($contact === null) {
+            return '';
+        }
+
+        $articleUrl = route('module', [
+            'module' => $this->name(),
+            'action' => 'Article',
+            'tree' => $tree->name(),
+            'slug' => $article->slug,
+        ]);
+        $body = I18N::translate(
+            "I need help with the guide “%s”.\n\nPerson or record involved:\nWhat I was trying to do:\nWhat happened:\n\nPlease include a page link or screenshot where useful. Do not include passwords or highly sensitive personal information.",
+            (string) $article->title
+        );
+
+        return route(ContactPage::class, [
+            'tree' => $tree->name(),
+            'to' => $contact->userName(),
+            'subject' => I18N::translate('Help Centre question: %s', (string) $article->title),
+            'body' => $body,
+            'url' => $articleUrl,
+        ]);
+    }
+
+    /** @return list<array{label:string,url:string}> */
+    private function parseResourceLinksText(string $value): array
+    {
+        $links = [];
+        foreach (preg_split('/\R/u', $value) ?: [] as $line) {
+            $line = trim($line);
+            if ($line === '') {
+                continue;
+            }
+            [$label, $url] = array_pad(array_map('trim', explode('|', $line, 2)), 2, '');
+            if ($label !== '' && filter_var($url, FILTER_VALIDATE_URL) && str_starts_with(strtolower($url), 'https://')) {
+                $links[] = ['label' => strip_tags($label), 'url' => $url];
+            }
+        }
+
+        return $links;
+    }
+
+    /** @param list<array{label:string,url:string}> $links */
+    private function resourceLinksToText(array $links): string
+    {
+        return implode("\n", array_map(
+            static fn (array $link): string => $link['label'] . ' | ' . $link['url'],
+            $links
+        ));
     }
 
     private function assertAdmin(): void

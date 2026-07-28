@@ -553,106 +553,60 @@
     }
 }
 
-/* Contextual help links appear beside the webtrees feature being used.
- * Potts Modern variables are preferred so the box follows all colour presets.
- * Bootstrap and fixed fallbacks keep it readable in standard webtrees themes. */
+/* Compact contextual help link beside the webtrees feature being used.
+ * It intentionally stays visually secondary to the page itself. */
 .pmh-contextual-help {
-    --pmh-border: var(--potts-line, rgba(40, 50, 60, .16));
-    --pmh-heading: var(--potts-ink, var(--bs-body-color, #20332f));
+    --pmh-border: var(--potts-line, rgba(40, 50, 60, .18));
     --pmh-card: var(--potts-card-solid, var(--bs-body-bg, #fff));
     --pmh-accent: var(--potts-blue, var(--bs-primary, #3f6d78));
     --pmh-accent-dark: var(--potts-blue-dark, var(--bs-primary, #315762));
-    display: flex;
-    align-items: center;
-    gap: .68rem;
-    margin: .8rem 0 1rem;
-    padding: .64rem .82rem;
-    border: 1px solid rgba(63, 109, 120, .18);
-    border: 1px solid color-mix(in srgb, var(--pmh-accent) 17%, var(--pmh-border));
-    border-radius: .78rem;
-    background: rgba(63, 109, 120, .045);
-    background: color-mix(in srgb, var(--pmh-accent) 4.5%, var(--pmh-card));
-    color: var(--pmh-heading);
-    box-shadow: 0 .18rem .55rem rgba(20, 50, 55, .04);
-}
-
-.pmh-contextual-help--compact {
-    margin-top: 0;
-    margin-bottom: 1rem;
-    padding: .56rem .72rem;
-    box-shadow: none;
-}
-
-.pmh-contextual-help__icon {
     display: inline-flex;
-    flex: 0 0 1.6rem;
+    width: fit-content;
     align-items: center;
-    justify-content: center;
-    width: 1.6rem;
-    height: 1.6rem;
-    border: 1px solid rgba(63, 109, 120, .28);
-    border: 1px solid color-mix(in srgb, var(--pmh-accent) 30%, var(--pmh-border));
-    border-radius: 50%;
-    background: rgba(63, 109, 120, .10);
-    background: color-mix(in srgb, var(--pmh-accent) 10%, var(--pmh-card));
-    color: var(--pmh-accent-dark);
-    font-weight: 800;
-    line-height: 1;
-}
-
-.pmh-contextual-help__message {
-    flex: 1 1 auto;
-    min-width: 10rem;
-    font-weight: 600;
-    line-height: 1.35;
-}
-
-.pmh-contextual-help__link {
-    display: inline-flex;
-    flex: 0 0 auto;
-    align-items: center;
-    justify-content: center;
-    min-height: 2.15rem;
-    padding: .36rem .76rem;
-    border: 1px solid rgba(63, 109, 120, .34);
-    border: 1px solid color-mix(in srgb, var(--pmh-accent) 36%, var(--pmh-border));
+    gap: .38rem;
+    margin: .3rem 0 .65rem;
+    padding: .24rem .55rem;
+    border: 1px solid color-mix(in srgb, var(--pmh-accent) 25%, var(--pmh-border));
     border-radius: 999px;
-    background: var(--pmh-card);
+    background: color-mix(in srgb, var(--pmh-accent) 4%, var(--pmh-card));
     color: var(--pmh-accent-dark) !important;
-    font-weight: 700;
+    font-size: .875rem;
+    font-weight: 650;
     line-height: 1.2;
     text-decoration: none !important;
 }
 
-/* Keep contextual-help actions readable even when a theme applies its own
-   global link-hover colour or transparent button background. */
-html body .pmh-contextual-help > a.pmh-contextual-help__link:hover,
-html body .pmh-contextual-help > a.pmh-contextual-help__link:focus,
-html body .pmh-contextual-help > a.pmh-contextual-help__link:focus-visible {
-    border-color: rgba(63, 109, 120, .48) !important;
-    border-color: color-mix(in srgb, var(--pmh-accent) 46%, var(--pmh-border)) !important;
-    background-color: rgba(63, 109, 120, .10) !important;
-    background-color: color-mix(in srgb, var(--pmh-accent) 10%, var(--pmh-card)) !important;
-    background-image: none !important;
-    color: var(--pmh-accent-dark) !important;
-    opacity: 1 !important;
-    text-shadow: none !important;
-    box-shadow: 0 0 0 .18rem color-mix(in srgb, var(--pmh-accent) 11%, transparent) !important;
+.pmh-contextual-help--compact {
+    margin-top: 0;
 }
 
-@media (max-width: 620px) {
-    .pmh-contextual-help {
-        align-items: flex-start;
-        flex-wrap: wrap;
-    }
+.pmh-contextual-help__icon {
+    display: inline-flex;
+    flex: 0 0 1.2rem;
+    align-items: center;
+    justify-content: center;
+    width: 1.2rem;
+    height: 1.2rem;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--pmh-accent) 13%, var(--pmh-card));
+    color: var(--pmh-accent-dark);
+    font-size: .78rem;
+    font-weight: 800;
+    line-height: 1;
+}
 
-    .pmh-contextual-help__message {
-        flex-basis: calc(100% - 2.4rem);
-    }
+.pmh-contextual-help__label {
+    white-space: nowrap;
+}
 
-    .pmh-contextual-help__link {
-        margin-left: 2.35rem;
-    }
+html body a.pmh-contextual-help:hover,
+html body a.pmh-contextual-help:focus,
+html body a.pmh-contextual-help:focus-visible {
+    border-color: color-mix(in srgb, var(--pmh-accent) 48%, var(--pmh-border)) !important;
+    background-color: color-mix(in srgb, var(--pmh-accent) 10%, var(--pmh-card)) !important;
+    color: var(--pmh-accent-dark) !important;
+    text-decoration: none !important;
+    box-shadow: 0 0 0 .16rem color-mix(in srgb, var(--pmh-accent) 10%, transparent) !important;
 }
 
 /* Help Centre 0.5 landing page and article tools. */
@@ -1045,4 +999,22 @@ html body .pmh-contextual-help > a.pmh-contextual-help__link:focus-visible {
     margin-top: 0.5rem;
     color: var(--bs-secondary-color, #5f6670);
     font-size: 0.875rem;
+}
+
+
+.pmh-language-fallback {
+    margin-bottom: 1rem;
+}
+
+.pmh-resource-list {
+    margin: 0;
+    padding-left: 1.15rem;
+}
+
+.pmh-resource-list li + li {
+    margin-top: .5rem;
+}
+
+.pmh-contact-action {
+    width: 100%;
 }

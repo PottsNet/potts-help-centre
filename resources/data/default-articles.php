@@ -24,6 +24,8 @@ return array (
 <h2>Why some information is missing</h2>
 <p>webtrees applies privacy and access rules to every record. Living people and recent family details may be hidden, partly shown or available only to approved registered members. Optional modules and the selected language can also change what appears.</p>
 <p>The help topics shown in this centre match the features currently enabled on this website.</p>',
+    'language' => 'en',
+    'translation_key' => 'welcome-to-the-family-tree',
   ),
   1 => 
   array (
@@ -44,6 +46,8 @@ return array (
 <li><strong>Source and citation:</strong> where a particular piece of information came from.</li>
 </ul>
 <p>This distinction explains why different tasks are performed in different places. Personal events are viewed in <strong>Facts and events</strong>, while partners, parents and children are managed through <strong>Families</strong>. A Biography tab may summarise the same records as a story, but it does not hold a separate copy of the data.</p>',
+    'language' => 'en',
+    'translation_key' => 'how-webtrees-organises-family-information',
   ),
   2 => 
   array (
@@ -69,6 +73,16 @@ return array (
 </ol>
 <p>webtrees may display a person under the spelling used in an original record. A known-as name or nickname may also appear beside the formal name.</p>
 <p>When a name is common, begin with a better-known relative and follow the family links rather than relying on the name alone.</p>',
+    'language' => 'en',
+    'translation_key' => 'visitor-find-a-person',
+    'resource_links' => 
+    array (
+      0 => 
+      array (
+        'label' => 'Official webtrees user documentation',
+        'url' => 'https://webtrees.net/user/',
+      ),
+    ),
   ),
   3 => 
   array (
@@ -90,6 +104,16 @@ return array (
 <li>Remove one search condition at a time when no results are returned.</li>
 </ul>
 <p>Search results only include records you are permitted to view. A private person may not appear even when they exist in the tree.</p>',
+    'language' => 'en',
+    'translation_key' => 'use-general-and-advanced-search',
+    'resource_links' => 
+    array (
+      0 => 
+      array (
+        'label' => 'Official webtrees user documentation',
+        'url' => 'https://webtrees.net/user/',
+      ),
+    ),
   ),
   4 => 
   array (
@@ -116,6 +140,8 @@ return array (
 <li><strong>Sources, notes or specialist tabs:</strong> additional research material or module features.</li>
 </ul>
 <p>The tabs are different views of connected records. Moving from one tab to another does not create a different person. Privacy rules can also mean that one visitor sees fewer tabs or less content than another.</p>',
+    'language' => 'en',
+    'translation_key' => 'understand-individual-page-tabs',
   ),
   5 => 
   array (
@@ -139,6 +165,8 @@ return array (
 <li>death, burial and a summary of the person’s recorded life</li>
 </ul>
 <p>The Biography never reveals information that webtrees has hidden. A short biography usually means that fewer facts are recorded or visible, not that the module has ignored them.</p>',
+    'language' => 'en',
+    'translation_key' => 'what-the-biography-tab-shows',
   ),
   6 => 
   array (
@@ -160,6 +188,8 @@ return array (
 <li>Add notes and sources to the relevant person, family or event.</li>
 </ul>
 <p>After an approved change is saved, the Biography is rebuilt from the updated records. There is normally no separate biography text to edit.</p>',
+    'language' => 'en',
+    'translation_key' => 'why-biography-cannot-be-edited-directly',
   ),
   7 => 
   array (
@@ -187,6 +217,8 @@ return array (
     'screenshot_caption' => 'Facts and events can display dates, places, map links and other details recorded for the person.',
     'screenshot_source' => 'Official webtrees location guide',
     'screenshot_source_url' => 'https://webtrees.net/faq/locations/',
+    'language' => 'en',
+    'translation_key' => 'use-facts-and-events-tab',
   ),
   8 => 
   array (
@@ -206,6 +238,8 @@ return array (
 <li>Adoptive, foster, step and other relationship types may be recorded separately.</li>
 </ul>
 <p>Members with editing permission also use this tab to add or correct parents, partners and children. Relationship changes should not be made by merely typing a relative’s name into a note.</p>',
+    'language' => 'en',
+    'translation_key' => 'use-families-tab',
   ),
   9 => 
   array (
@@ -232,6 +266,8 @@ return array (
     'screenshot_caption' => 'An interactive tree gives a visual overview of ancestors and family connections. Names, colours and controls vary by theme.',
     'screenshot_source' => 'Official webtrees website',
     'screenshot_source_url' => 'https://webtrees.net/',
+    'language' => 'en',
+    'translation_key' => 'explore-charts-and-interactive-tree',
   ),
   10 => 
   array (
@@ -251,6 +287,8 @@ return array (
 <li>Return to a known person through quick search when you lose your place.</li>
 </ul>
 <p>People with similar names may belong to different branches. Dates, places and family members are usually more reliable identifiers than the name alone.</p>',
+    'language' => 'en',
+    'translation_key' => 'follow-family-links',
   ),
   11 => 
   array (
@@ -272,6 +310,8 @@ return array (
 </ol>
 <p>The administrator decides which fallbacks are allowed. Select the relationship link to open the normal webtrees relationship-path chart when one is available.</p>
 <p>No relationship message does not prove that the families are unrelated. The connecting records may be private, incomplete or beyond the configured search depth.</p>',
+    'language' => 'en',
+    'translation_key' => 'understand-relationship-summary',
   ),
   12 => 
   array (
@@ -291,6 +331,8 @@ return array (
 </ol>
 <p>This controls relationship labels within the Facts and events presentation. It may not remove the main relationship summary near the person’s heading because the administrator can configure that summary separately.</p>
 <p>Your choice affects only what you see. It does not change the family tree or another visitor’s settings.</p>',
+    'language' => 'en',
+    'translation_key' => 'turn-relationship-labels-on-or-off',
   ),
   13 => 
   array (
@@ -310,6 +352,8 @@ return array (
 <li>important events involving siblings or other close family</li>
 </ul>
 <p>The event still belongs to the relative whose record contains it. It is displayed here as context. Correcting the event requires editing the relative’s own record, not the person whose timeline happens to show it.</p>',
+    'language' => 'en',
+    'translation_key' => 'what-are-events-of-close-relatives',
   ),
   14 => 
   array (
@@ -329,6 +373,8 @@ return array (
 </ol>
 <p>The exact wording and position can vary slightly with the active theme and installed modules. The setting changes the view only. It does not remove events from relatives’ records.</p>
 <p>When the timeline feels crowded, turn off close relatives, associates or historical facts one category at a time.</p>',
+    'language' => 'en',
+    'translation_key' => 'show-hide-close-relative-events',
   ),
   15 => 
   array (
@@ -349,6 +395,8 @@ return array (
 </ol>
 <p>Your selection is remembered in your browser. It is independent of the language used to display webtrees.</p>
 <p>Only events that overlap the person’s lifetime are shown. Broad collections can overlap with country collections, so selecting many collections may produce similar or repeated themes.</p>',
+    'language' => 'en',
+    'translation_key' => 'choose-historical-collections',
   ),
   16 => 
   array (
@@ -368,6 +416,8 @@ return array (
 <li>Remember that a historical event is context; it does not claim that the person participated in it.</li>
 </ul>
 <p>If an event is incorrect or belongs to the wrong collection, report it to the site administrator rather than editing the individual’s genealogy record.</p>',
+    'language' => 'en',
+    'translation_key' => 'historical-facts-in-facts-events',
   ),
   17 => 
   array (
@@ -389,6 +439,8 @@ return array (
 <li>shows source links supplied with the historical collection</li>
 </ul>
 <p>Change the History selection and reload the Biography when you want to compare another region. A missing historical section may mean no matching events were found, the module is disabled or the person’s dates and migration details are incomplete.</p>',
+    'language' => 'en',
+    'translation_key' => 'historical-context-in-biography',
   ),
   18 => 
   array (
@@ -409,6 +461,8 @@ return array (
 </ul>
 <p>An age may be absent when the birth date or event date is incomplete, unsupported, private or uncertain. Approximate dates and ranges can only produce the precision supported by the recorded information.</p>
 <p>The administrator controls which categories and event types receive labels. Seeing an age does not make the underlying date more certain.</p>',
+    'language' => 'en',
+    'translation_key' => 'understand-fact-ages',
   ),
   19 => 
   array (
@@ -420,20 +474,37 @@ return array (
     'published' => true,
     'audience' => 'visitors',
     'requires_modules' => '',
-    'body' => '<p>Family-history records are often inconsistent or incomplete.</p>
+    'body' => '<p>Family-history records are often incomplete, contradictory or written according to the customs of another period. webtrees can preserve that uncertainty rather than forcing every detail into a modern, exact form.</p>
+<h2>Names</h2>
 <ul>
 <li>A person may have formal names, a maiden surname, married names, nicknames and alternative spellings.</li>
 <li>A starred given name may identify the part of a formal name by which the person was known. The asterisk itself is not normally displayed in the Biography.</li>
-<li><strong>About</strong>, <strong>before</strong> and <strong>after</strong> show uncertainty.</li>
-<li><strong>Between</strong> or <strong>from/to</strong> records a range rather than an exact day.</li>
-<li>Places may use the historical name, a standard modern hierarchy or both.</li>
+<li>Check the person’s relatives, dates and places before assuming that a different spelling belongs to a different person.</li>
 </ul>
-<p>Conflicting records can be retained with notes and sources when the evidence is genuinely uncertain. A difference is not always a mistake.</p>',
+<h2>Dates</h2>
+<ul>
+<li><strong>About</strong>, <strong>before</strong> and <strong>after</strong> record uncertainty.</li>
+<li><strong>Between</strong> and <strong>from/to</strong> record ranges rather than exact days.</li>
+<li>Do not turn an estimate into an exact date simply to make a chart look complete.</li>
+</ul>
+<h2>Places</h2>
+<p>Places may use a historically accurate name, a consistent modern hierarchy or both through a note. Follow the conventions used by this tree and select existing place suggestions where appropriate.</p>
+<p>Conflicting records can be retained with explanatory notes and citations when the evidence is genuinely uncertain. A difference is not always a mistake.</p>',
     'screenshot' => 'module://event-map.webp',
     'screenshot_alt' => 'A webtrees map showing separate markers for a birth and burial near Milton Keynes.',
     'screenshot_caption' => 'Place names and recorded coordinates can be used to display events on a map.',
     'screenshot_source' => 'Official webtrees location guide',
     'screenshot_source_url' => 'https://webtrees.net/faq/locations/',
+    'language' => 'en',
+    'translation_key' => 'understand-names-dates-and-places',
+    'resource_links' => 
+    array (
+      0 => 
+      array (
+        'label' => 'Official webtrees guidance about locations',
+        'url' => 'https://webtrees.net/faq/locations/',
+      ),
+    ),
   ),
   20 => 
   array (
@@ -457,6 +528,8 @@ return array (
 <li>an administrator has changed a module or tab setting</li>
 </ul>
 <p>Privacy filtering also affects generated biographies, charts and relationship paths. A missing paragraph or connection may therefore be an access decision rather than an error.</p>',
+    'language' => 'en',
+    'translation_key' => 'why-visitors-see-different-information',
   ),
   21 => 
   array (
@@ -476,6 +549,8 @@ return array (
 <li>Information visible to a registered member should not be copied or shared without permission.</li>
 </ul>
 <p>Contact the administrator when you have a genuine family-history reason for requesting access. Include enough information to establish your connection to the family.</p>',
+    'language' => 'en',
+    'translation_key' => 'why-living-people-are-private',
   ),
   22 => 
   array (
@@ -497,6 +572,8 @@ return array (
 <li>any information, photographs or research you would like to contribute</li>
 </ul>
 <p>An account may need email verification and administrator approval. Approval protects living relatives and helps prevent fraudulent registrations.</p>',
+    'language' => 'en',
+    'translation_key' => 'request-a-registered-account',
   ),
   23 => 
   array (
@@ -520,6 +597,8 @@ return array (
 <li>Check spam or junk mail when the reset message does not appear.</li>
 </ol>
 <p>Reset links can expire and should not be shared. Contact the administrator if you no longer have access to the registered email address, cannot remember the username or the account remains locked.</p>',
+    'language' => 'en',
+    'translation_key' => 'sign-in-or-reset-your-password',
   ),
   24 => 
   array (
@@ -542,6 +621,16 @@ return array (
 </ul>
 <p>An online family tree by itself is not strong evidence because trees often copy one another. Original records or clearly identified contemporary sources are especially helpful.</p>
 <p>Explain uncertainty rather than forcing a precise answer when records conflict.</p>',
+    'language' => 'en',
+    'translation_key' => 'report-a-correction',
+    'resource_links' => 
+    array (
+      0 => 
+      array (
+        'label' => 'webtrees community forum',
+        'url' => 'https://webtrees.net/forum/',
+      ),
+    ),
   ),
   25 => 
   array (
@@ -564,6 +653,16 @@ return array (
 <li>whether permission is given for website display</li>
 </ul>
 <p>High-resolution scans are preferred. Keep an unedited master copy and do not crop away handwritten notes, photographer details or the reverse side of a photograph before making a preservation copy.</p>',
+    'language' => 'en',
+    'translation_key' => 'share-family-information',
+    'resource_links' => 
+    array (
+      0 => 
+      array (
+        'label' => 'webtrees community forum',
+        'url' => 'https://webtrees.net/forum/',
+      ),
+    ),
   ),
   26 => 
   array (
@@ -583,6 +682,8 @@ return array (
 <li>Contact the administrator before reproducing substantial biographies, research notes or image collections elsewhere.</li>
 </ul>
 <p>Public historical facts may be freely known, but photographs, scans, transcriptions and original writing can still be protected by copyright or family usage conditions.</p>',
+    'language' => 'en',
+    'translation_key' => 'using-photographs-and-information',
   ),
   27 => 
   array (
@@ -597,6 +698,8 @@ return array (
     'body' => '<p>Use the language selector provided by the site to change webtrees menus, headings, fact labels and other translated text.</p>
 <p>Changing the language does not translate names, notes, documents or user-written research automatically. Historical Facts may use a language-matched collection when one is available, while the selected region remains your choice.</p>
 <p>Some custom-module wording may remain in the site’s main language when a translation has not yet been supplied. Report unclear or untranslated labels to the administrator with a screenshot and the language selected.</p>',
+    'language' => 'en',
+    'translation_key' => 'change-display-language',
   ),
   28 => 
   array (
@@ -618,6 +721,16 @@ return array (
 <li>cannot find a tab or display option described in this help centre</li>
 </ul>
 <p>Include the person’s name, a page link, what you expected, what actually happened and a screenshot where useful. Do not send passwords or highly sensitive personal documents through an insecure contact form.</p>',
+    'language' => 'en',
+    'translation_key' => 'contact-the-site-administrator',
+    'resource_links' => 
+    array (
+      0 => 
+      array (
+        'label' => 'webtrees community forum',
+        'url' => 'https://webtrees.net/forum/',
+      ),
+    ),
   ),
   29 => 
   array (
@@ -637,6 +750,8 @@ return array (
 <li>Protect living people and avoid entering sensitive information that does not serve a genuine family-history purpose.</li>
 </ol>
 <p>Use <strong>Facts and events</strong> for life details and <strong>Families</strong> for parents, partners and children. The Biography is a generated reading view and should not be treated as the editing form.</p>',
+    'language' => 'en',
+    'translation_key' => 'before-you-make-a-change',
   ),
   30 => 
   array (
@@ -660,6 +775,8 @@ return array (
 </tbody>
 </table>
 <p>Exact button placement can vary with the theme, your permissions and the type of record.</p>',
+    'language' => 'en',
+    'translation_key' => 'choose-correct-tab-for-change',
   ),
   31 => 
   array (
@@ -680,6 +797,8 @@ return array (
 <li>Ask the administrator when two records may represent the same person.</li>
 </ol>
 <p>Do not create a second person merely because a private record is hidden from you. Limited access can make an existing person difficult to recognise.</p>',
+    'language' => 'en',
+    'translation_key' => 'find-before-creating',
   ),
   32 => 
   array (
@@ -702,6 +821,8 @@ return array (
 <li>Save and check the resulting family connections.</li>
 </ol>
 <p>Creating from the family context reduces the chance of leaving the new person unconnected or attaching them to the wrong family.</p>',
+    'language' => 'en',
+    'translation_key' => 'create-a-new-person',
   ),
   33 => 
   array (
@@ -728,6 +849,8 @@ return array (
 <li>Save and confirm that both partners appear in the same family section.</li>
 </ol>
 <p>A partner is a family relationship, not merely a marriage fact on one person. Linking the family correctly allows children, charts and biographies to use the relationship consistently.</p>',
+    'language' => 'en',
+    'translation_key' => 'add-a-partner',
   ),
   34 => 
   array (
@@ -748,6 +871,8 @@ return array (
 <li>Add children to the correct partner family.</li>
 </ol>
 <p>Do not place children from different relationships into one family for convenience. Correct family grouping is essential for descendant charts and for Biography wording about partners and children.</p>',
+    'language' => 'en',
+    'translation_key' => 'add-another-partner',
   ),
   35 => 
   array (
@@ -775,6 +900,8 @@ return array (
 <li>Save and verify that the child appears with the correct parents.</li>
 </ol>
 <p>When only one parent is known, webtrees can still record a family with one identified parent. Do not invent an unknown parent to make the layout look complete.</p>',
+    'language' => 'en',
+    'translation_key' => 'add-a-child',
   ),
   36 => 
   array (
@@ -795,6 +922,8 @@ return array (
 <li>Save and check siblings and charts for unexpected connections.</li>
 </ol>
 <p>When the existing parents are wrong, do not simply add another pair. Ask an administrator to help unlink the incorrect family when you are unsure, because deleting a person is not the same as removing a relationship.</p>',
+    'language' => 'en',
+    'translation_key' => 'add-or-correct-parents',
   ),
   37 => 
   array (
@@ -815,6 +944,8 @@ return array (
 <li>Check charts and sibling lists afterwards.</li>
 </ol>
 <p>Relationship changes can affect many pages. Contact an administrator when the action is unavailable or when the person belongs to several families and the consequences are unclear.</p>',
+    'language' => 'en',
+    'translation_key' => 'correct-family-relationship',
   ),
   38 => 
   array (
@@ -840,6 +971,8 @@ return array (
 <li>Save and check the page heading, search results and Biography.</li>
 </ol>
 <p>Do not silently replace a documented historical spelling with a modern spelling. Add an alternative name when both forms are supported by evidence.</p>',
+    'language' => 'en',
+    'translation_key' => 'correct-a-name',
   ),
   39 => 
   array (
@@ -859,6 +992,8 @@ return array (
 <li>Retain spelling variants that appear in significant records when they help searching and identification.</li>
 </ul>
 <p>Search in webtrees generally becomes more useful when both the birth surname and important later names are recorded properly.</p>',
+    'language' => 'en',
+    'translation_key' => 'record-maiden-and-married-names',
   ),
   40 => 
   array (
@@ -879,6 +1014,8 @@ return array (
 <li>Add an explanatory note or source when the preferred name may not be obvious.</li>
 </ul>
 <p>Potts Biography prefers a starred known-as given name, then GEDCOM nickname, then the first given name.</p>',
+    'language' => 'en',
+    'translation_key' => 'add-a-nickname-known-as',
   ),
   41 => 
   array (
@@ -900,6 +1037,8 @@ return array (
 <li>Save and check the timeline.</li>
 </ol>
 <p>A fact should describe the person, not a general historical event. Use the Historical Facts module or contact the administrator for regional history that did not happen directly to the individual.</p>',
+    'language' => 'en',
+    'translation_key' => 'add-a-fact-or-event',
   ),
   42 => 
   array (
@@ -919,6 +1058,8 @@ return array (
 </ol>
 <p>Delete an event only when it is genuinely wrong or duplicated. When the evidence conflicts, it may be better to keep the event, qualify the date and explain the uncertainty in a note.</p>
 <p>Some displayed events belong to a partner or close relative. In that case, follow the person’s link and edit the event on the record that owns it.</p>',
+    'language' => 'en',
+    'translation_key' => 'edit-or-remove-event',
   ),
   43 => 
   array (
@@ -941,6 +1082,8 @@ return array (
 <li><code>FROM 2004 TO 2025</code> — a state such as residence continued across the period</li>
 </ul>
 <p>For a residence lasting from 2004 until 2025, <strong>FROM 2004 TO 2025</strong> is generally clearer than <strong>BET 2004 AND 2025</strong>, because the latter means the event happened at some unknown point between those years.</p>',
+    'language' => 'en',
+    'translation_key' => 'record-dates-and-date-ranges',
   ),
   44 => 
   array (
@@ -961,6 +1104,8 @@ return array (
 <li>Cite electoral rolls, directories, certificates, correspondence or family evidence.</li>
 </ol>
 <p>Create separate residence facts when the person moved away and later returned, or when the evidence relates to distinct addresses.</p>',
+    'language' => 'en',
+    'translation_key' => 'record-residence-period',
   ),
   45 => 
   array (
@@ -968,25 +1113,43 @@ return array (
     'title' => 'Enter places consistently',
     'slug' => 'enter-places-consistently',
     'category' => 'facts-events',
-    'summary' => 'Use a standard place hierarchy so maps, searches and reports can group records correctly.',
+    'summary' => 'Enter the same place in the same way so suggestions, maps, place lists and reports group records correctly.',
     'published' => true,
     'audience' => 'members',
     'requires_modules' => '',
-    'body' => '<p>Follow the place order used by this tree, commonly:</p>
+    'body' => '<p>webtrees treats the text in a place field as a hierarchy. Use the place order adopted by this tree, usually from the most specific area to the broadest:</p>
 <p><code>locality, municipality or county, state or region, country</code></p>
+<h2>Choose an existing place where possible</h2>
+<ol>
+<li>Begin typing the place and check the suggestions.</li>
+<li>Select an existing suggestion when it represents the same location.</li>
+<li>Before creating a new version, check spelling, punctuation and whether an abbreviation has already been expanded.</li>
+</ol>
+<p>For example, use one agreed form such as <code>Newborough, Victoria, Australia</code>. Avoid creating separate entries such as <code>Newborough VIC Australia</code>, <code>Newborough, Vic.</code> and <code>Newborough, Australia</code> for the same place.</p>
+<h2>Historical and modern place names</h2>
+<p>Use the place name that best describes where the event occurred. When boundaries or names changed, record the historical place in the event and explain the modern location in a note where that helps readers. Do not silently replace a historically accurate name merely because a modern name is more familiar.</p>
+<h2>Addresses and coordinates</h2>
 <ul>
-<li>Select an existing place suggestion where it represents the same location.</li>
-<li>Do not create slightly different versions through punctuation or abbreviations alone.</li>
-<li>Use the historical locality in the event place when appropriate, then explain modern boundaries in a note.</li>
-<li>Keep street addresses separate from the broader place hierarchy where webtrees provides address fields.</li>
-<li>Add map coordinates only when reasonably verified.</li>
+<li>Keep a street address in the address fields when webtrees provides them, rather than making it part of every level of the place hierarchy.</li>
+<li>Add coordinates only when they are reasonably verified.</li>
+<li>Do not copy town-centre coordinates into a specific event unless they genuinely identify the event location.</li>
 </ul>
-<p>Consistent places improve maps, place lists and the country-aware historical context used by Biography.</p>',
+<p>After saving, check the place link or map and correct any accidental duplicate. Consistent places improve searching, mapping and country-aware historical context.</p>',
     'screenshot' => 'module://edit-location.webp',
     'screenshot_alt' => 'The webtrees geographic location editor showing a map, place field, latitude and longitude.',
     'screenshot_caption' => 'The geographic-data screen is separate from the place text recorded in an individual event.',
     'screenshot_source' => 'Official webtrees location guide',
     'screenshot_source_url' => 'https://webtrees.net/faq/locations/',
+    'language' => 'en',
+    'translation_key' => 'enter-places-consistently',
+    'resource_links' => 
+    array (
+      0 => 
+      array (
+        'label' => 'Official webtrees guidance about locations',
+        'url' => 'https://webtrees.net/faq/locations/',
+      ),
+    ),
   ),
   46 => 
   array (
@@ -1006,6 +1169,8 @@ return array (
 <li><strong>Religion, title or elected role:</strong> record only when relevant and supported.</li>
 </ul>
 <p>Add dates and places when known. Multiple occupation facts allow webtrees and Biography to present change over time instead of implying that one occupation lasted for the person’s entire life.</p>',
+    'language' => 'en',
+    'translation_key' => 'record-occupations-education-life-details',
   ),
   47 => 
   array (
@@ -1025,6 +1190,8 @@ return array (
 <li>Save and check both partners’ timelines and biographies.</li>
 </ol>
 <p>Do not add separate conflicting marriage facts to each partner when one family event can represent the relationship. Use a family note when the legal and personal circumstances require explanation.</p>',
+    'language' => 'en',
+    'translation_key' => 'add-correct-marriage-divorce',
   ),
   48 => 
   array (
@@ -1045,6 +1212,8 @@ return array (
 <li>Return to the original person and reload the tab.</li>
 </ol>
 <p>When the event is a marriage or divorce, edit the appropriate family record through Families. Do not create a duplicate event on the current person just to alter the contextual display.</p>',
+    'language' => 'en',
+    'translation_key' => 'correct-close-relative-event',
   ),
   49 => 
   array (
@@ -1063,6 +1232,8 @@ return array (
 <li>Reload the tab if a dynamically loaded option does not update immediately.</li>
 </ol>
 <p>These are personal viewing choices. They do not delete events and may be remembered by the browser. The exact options depend on the active webtrees modules.</p>',
+    'language' => 'en',
+    'translation_key' => 'control-facts-events-displays',
   ),
   50 => 
   array (
@@ -1090,6 +1261,8 @@ return array (
 <li>Save and check privacy before publishing material involving living people.</li>
 </ol>
 <p>One media record can be linked to several people and events. Reuse it instead of uploading the same image repeatedly.</p>',
+    'language' => 'en',
+    'translation_key' => 'add-a-photograph-or-document',
   ),
   51 => 
   array (
@@ -1109,6 +1282,8 @@ return array (
 <li>Check that the title and privacy settings make sense in every linked context.</li>
 </ol>
 <p>Linking preserves one description and one master file. Editing the media record can affect every person or event linked to it.</p>',
+    'language' => 'en',
+    'translation_key' => 'link-existing-media-item',
   ),
   52 => 
   array (
@@ -1129,6 +1304,8 @@ return array (
 <li>Check the individual header, charts and Biography after saving.</li>
 </ol>
 <p>Do not delete useful group photographs merely because they are unsuitable as the main portrait.</p>',
+    'language' => 'en',
+    'translation_key' => 'choose-main-photograph',
   ),
   53 => 
   array (
@@ -1149,6 +1326,8 @@ return array (
 <li>Save and reload the Biography.</li>
 </ol>
 <p>Media linked only to the person remains available, but an undated unattached item may appear in <strong>Photographs and keepsakes</strong> rather than beside a specific chapter. Do not invent a date merely to force placement.</p>',
+    'language' => 'en',
+    'translation_key' => 'attach-media-to-biography-event',
   ),
   54 => 
   array (
@@ -1169,6 +1348,8 @@ return array (
 <li>Record source, ownership and usage permission.</li>
 </ul>
 <p>Biography inherits dates and ages from reliable event links where appropriate. Undated media is not assigned an invented year or age.</p>',
+    'language' => 'en',
+    'translation_key' => 'improve-biography-media',
   ),
   55 => 
   array (
@@ -1195,6 +1376,16 @@ return array (
 <li>Save and confirm the citation appears with the correct fact.</li>
 </ol>
 <p>A source attached only to the person is less precise than a citation attached directly to the claim it supports.</p>',
+    'language' => 'en',
+    'translation_key' => 'add-source-and-citation',
+    'resource_links' => 
+    array (
+      0 => 
+      array (
+        'label' => 'Official webtrees frequently asked questions',
+        'url' => 'https://webtrees.net/faq/',
+      ),
+    ),
   ),
   56 => 
   array (
@@ -1216,6 +1407,8 @@ return array (
 </ul>
 <p>Attach the note to the relevant person, family or event. Keep conclusions separate from speculation and cite the evidence discussed.</p>
 <p>Do not use a note as a substitute for entering a supported event in the proper field.</p>',
+    'language' => 'en',
+    'translation_key' => 'add-research-note',
   ),
   57 => 
   array (
@@ -1236,6 +1429,8 @@ return array (
 <li>Save and reload the Biography.</li>
 </ol>
 <p>A general note attached only to the individual may appear separately or may not have enough context for intelligent placement. Avoid raw GEDCOM references or unexplained shorthand intended only for the researcher.</p>',
+    'language' => 'en',
+    'translation_key' => 'research-notes-in-biography',
   ),
   58 => 
   array (
@@ -1252,6 +1447,8 @@ return array (
 <p><strong>Historical context:</strong> “The First World War was taking place during this period.”</p>
 <p>Add the personal event to the individual’s Facts and events with evidence. Historical context belongs in Potts Historical Facts so it can be sourced once and shown appropriately for many people.</p>
 <p>When a historical event had a direct effect on the family, record the effect as a personal event or note and retain the wider event as historical context.</p>',
+    'language' => 'en',
+    'translation_key' => 'personal-events-vs-historical-context',
   ),
   59 => 
   array (
@@ -1274,6 +1471,8 @@ return array (
 <li>a category such as political, social, military, disaster or technology where used</li>
 </ul>
 <p>Administrators can add a persistent custom CSV file under the webtrees data folder. The module then filters the event to people whose lifetimes overlap it. Do not edit bundled files in the module folder because upgrades can replace them.</p>',
+    'language' => 'en',
+    'translation_key' => 'add-historical-information',
   ),
   60 => 
   array (
@@ -1294,6 +1493,8 @@ return array (
 <li>Reload the Biography and check that the historical context changes at a sensible point.</li>
 </ol>
 <p>Without a reliable migration date, the Biography cannot know when to stop using one country’s history and begin another’s. Do not create a false exact date solely for presentation.</p>',
+    'language' => 'en',
+    'translation_key' => 'historical-context-and-migration',
   ),
   61 => 
   array (
@@ -1312,6 +1513,8 @@ return array (
 <li>The module may otherwise use the public reference person or the tree root.</li>
 </ul>
 <p>The administrator controls the permitted reference sources and maximum search depth. A favourite will not override a linked individual when the linked-account option has priority.</p>',
+    'language' => 'en',
+    'translation_key' => 'relationship-reference-person',
   ),
   62 => 
   array (
@@ -1330,6 +1533,8 @@ return array (
 <li>Untick it to hide those labels.</li>
 </ol>
 <p>The main relationship summary near the person’s heading may remain because its display position is configured by the administrator. Your checkbox changes the event-level presentation rather than the recorded relationships.</p>',
+    'language' => 'en',
+    'translation_key' => 'member-relationship-display',
   ),
   63 => 
   array (
@@ -1349,6 +1554,8 @@ return array (
 </ul>
 <p>The administrator also chooses personal, family, close-relative, associate and historical categories, the included GEDCOM tags, the layout and whether ages are simple or detailed.</p>
 <p>Members can choose which tab to read and can use the ordinary Facts and events category options, but they usually cannot change the site-wide age style. Contact the administrator when duplicate age labels appear or a useful event type is excluded.</p>',
+    'language' => 'en',
+    'translation_key' => 'fact-ages-display-options',
   ),
   64 => 
   array (
@@ -1369,6 +1576,8 @@ return array (
 </ol>
 <p>Biography wording depends on the combination of facts, dates, relationships, media and privacy. One correction can alter several sentences.</p>
 <p>A change may not appear immediately when it is awaiting approval, hidden by privacy, recorded on the wrong person or family, outside the module’s supported narrative facts or overridden by stronger records.</p>',
+    'language' => 'en',
+    'translation_key' => 'how-edits-update-biography',
   ),
   65 => 
   array (
@@ -1388,6 +1597,8 @@ return array (
 <li>An administrator may approve, reject or discuss the change.</li>
 </ul>
 <p>Provide a source and a concise explanation so the reviewer can assess the change. Avoid submitting the same edit repeatedly because it has not yet appeared publicly.</p>',
+    'language' => 'en',
+    'translation_key' => 'pending-changes-and-approvals',
   ),
   66 => 
   array (
@@ -1407,6 +1618,8 @@ return array (
 <li>Ask before adding detailed stories about another living person.</li>
 </ul>
 <p>When in doubt, save the information privately, provide it to the administrator or leave a research note explaining why it has not been published.</p>',
+    'language' => 'en',
+    'translation_key' => 'protect-living-people',
   ),
   67 => 
   array (
@@ -1429,6 +1642,8 @@ return array (
 <li>Review the resulting individual page, family and charts after significant changes.</li>
 </ul>
 <p>A smaller amount of well-supported information is more valuable than a large amount copied without evidence.</p>',
+    'language' => 'en',
+    'translation_key' => 'good-contribution-habits',
   ),
   68 => 
   array (
@@ -1449,6 +1664,8 @@ return array (
 <li>Review charts and families after the merge.</li>
 </ol>
 <p>Simply deleting the shorter record can also delete unique evidence or leave family links pointing incorrectly.</p>',
+    'language' => 'en',
+    'translation_key' => 'resolve-duplicate-people',
   ),
   69 => 
   array (
@@ -1470,6 +1687,8 @@ return array (
 <li>whether another member has pending changes</li>
 </ul>
 <p>Ask an administrator when you are uncertain. Deleting and unlinking have very different consequences.</p>',
+    'language' => 'en',
+    'translation_key' => 'delete-person-or-unlink-relationship',
   ),
   70 => 
   array (
@@ -1492,5 +1711,7 @@ return array (
 <li>the record is private or locked</li>
 </ul>
 <p>First try the Facts and events or Families tab. Contact the administrator with the person’s name, the task and a screenshot when the expected action is still unavailable.</p>',
+    'language' => 'en',
+    'translation_key' => 'why-no-edit-button',
   ),
 );

@@ -9,9 +9,10 @@
 /** @var array<string,string> $moduleRequirements */
 /** @var array<string,bool> $moduleStatus */
 /** @var array{yes:int,no:int} $feedbackTotals */
-/** @var array{total:int,published:int,drafts:int,visitors:int,members:int,everyone:int,featured:int,screenshots:int,helpful_rate:int|null} $dashboard */
+/** @var array{total:int,published:int,drafts:int,visitors:int,members:int,everyone:int,featured:int,screenshots:int,languages:int,helpful_rate:int|null} $dashboard */
 /** @var \Illuminate\Support\Collection<int,object> $attentionArticles */
 /** @var array{enabled:bool,visitors:bool,members:bool,individual:bool,family:bool,forms:bool,new_tab:bool} $contextualSettings */
+/** @var array<string,int> $languageCounts */
 $requirementsFor = static function (object $article): array {
     $raw = trim((string) ($article->requires_modules ?? ''));
     return $raw === '' ? [] : array_values(array_filter(array_map('trim', explode(',', $raw))));
@@ -70,6 +71,11 @@ $requirementsFor = static function (object $article): array {
         <span><?= e(\Fisharebest\Webtrees\I18N::translate('Illustrated guides')) ?></span>
         <strong><?= e((string) $dashboard['screenshots']) ?></strong>
         <small><?= e(\Fisharebest\Webtrees\I18N::translate('Articles with a screenshot')) ?></small>
+    </div>
+    <div class="pmh-admin-stat">
+        <span><?= e(\Fisharebest\Webtrees\I18N::translate('Languages')) ?></span>
+        <strong><?= e((string) $dashboard['languages']) ?></strong>
+        <small><?= e(\Fisharebest\Webtrees\I18N::translate('English fallback is automatic')) ?></small>
     </div>
     <div class="pmh-admin-stat">
         <span><?= e(\Fisharebest\Webtrees\I18N::translate('Helpful rating')) ?></span>
@@ -158,6 +164,48 @@ $requirementsFor = static function (object $article): array {
     </div>
 </div>
 
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
+            <div>
+                <h2 class="h5 mb-2"><?= e(\Fisharebest\Webtrees\I18N::translate('Languages and translation packs')) ?></h2>
+                <p class="mb-1"><?= e(\Fisharebest\Webtrees\I18N::translate('Create language-specific versions of an article using the same translation group. The visitor’s selected webtrees language is used, with English as the fallback.')) ?></p>
+                <p class="text-muted small mb-0"><?= e(\Fisharebest\Webtrees\I18N::translate('Bundled starter articles are currently supplied in English. Export a language as JSON, translate it and import it into this tree.')) ?></p>
+            </div>
+            <div class="d-flex flex-wrap gap-1">
+                <?php foreach ($languageCounts as $languageCode => $languageCount) : ?>
+                    <span class="badge text-bg-secondary"><?= e(strtoupper($languageCode)) ?>: <?= e((string) $languageCount) ?></span>
+                <?php endforeach ?>
+            </div>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-5">
+                <form method="post" action="<?= e(route('module', ['module' => $moduleName, 'action' => 'AdminLanguageExport', 'tree' => $tree->name()])) ?>">
+                    <?= csrf_field() ?>
+                    <label class="form-label" for="pmh-export-language"><?= e(\Fisharebest\Webtrees\I18N::translate('Export language')) ?></label>
+                    <div class="input-group">
+                        <select class="form-select" id="pmh-export-language" name="language">
+                            <?php foreach ($languageCounts as $languageCode => $languageCount) : ?>
+                                <option value="<?= e($languageCode) ?>"><?= e(strtoupper($languageCode)) ?> — <?= e(\Fisharebest\Webtrees\I18N::plural('%s article', '%s articles', $languageCount, (string) $languageCount)) ?></option>
+                            <?php endforeach ?>
+                        </select>
+                        <button class="btn btn-outline-primary" type="submit"><?= e(\Fisharebest\Webtrees\I18N::translate('Download JSON')) ?></button>
+                    </div>
+                </form>
+            </div>
+            <div class="col-lg-7">
+                <form method="post" action="<?= e(route('module', ['module' => $moduleName, 'action' => 'AdminLanguageImport', 'tree' => $tree->name()])) ?>">
+                    <?= csrf_field() ?>
+                    <label class="form-label" for="pmh-language-pack"><?= e(\Fisharebest\Webtrees\I18N::translate('Import language-pack JSON')) ?></label>
+                    <textarea class="form-control" id="pmh-language-pack" name="language_pack" rows="5" required></textarea>
+                    <div class="form-text mb-2"><?= e(\Fisharebest\Webtrees\I18N::translate('Matching language and translation-group entries are updated. New translations are added. Existing feedback is retained.')) ?></div>
+                    <button class="btn btn-outline-primary" type="submit"><?= e(\Fisharebest\Webtrees\I18N::translate('Import translations')) ?></button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <?php if ($attentionArticles->isNotEmpty()) : ?>
     <div class="card mb-4 border-warning">
         <div class="card-body">
@@ -190,7 +238,7 @@ $requirementsFor = static function (object $article): array {
 
 <div class="card mb-3 pmh-admin-filters" data-pmh-admin-filters>
     <div class="card-body row g-3 align-items-end">
-        <div class="col-lg-6">
+        <div class="col-lg-4">
             <label class="form-label" for="pmh-admin-search"><?= e(\Fisharebest\Webtrees\I18N::translate('Find an article')) ?></label>
             <input class="form-control" id="pmh-admin-search" type="search" placeholder="<?= e(\Fisharebest\Webtrees\I18N::translate('Search title, summary or category')) ?>" data-pmh-admin-search>
         </div>
@@ -199,6 +247,13 @@ $requirementsFor = static function (object $article): array {
             <select class="form-select" id="pmh-admin-audience" data-pmh-admin-audience>
                 <option value=""><?= e(\Fisharebest\Webtrees\I18N::translate('All audiences')) ?></option>
                 <?php foreach ($audiences as $key => $label) : ?><option value="<?= e($key) ?>"><?= e($label) ?></option><?php endforeach ?>
+            </select>
+        </div>
+        <div class="col-sm-6 col-lg-2">
+            <label class="form-label" for="pmh-admin-language"><?= e(\Fisharebest\Webtrees\I18N::translate('Language')) ?></label>
+            <select class="form-select" id="pmh-admin-language" data-pmh-admin-language>
+                <option value=""><?= e(\Fisharebest\Webtrees\I18N::translate('All languages')) ?></option>
+                <?php foreach ($languageCounts as $languageCode => $languageCount) : ?><option value="<?= e($languageCode) ?>"><?= e(strtoupper($languageCode)) ?></option><?php endforeach ?>
             </select>
         </div>
         <div class="col-sm-6 col-lg-3">
@@ -233,11 +288,12 @@ $requirementsFor = static function (object $article): array {
         <tbody>
             <?php foreach ($articles as $article) : ?>
                 <?php $requirements = $requirementsFor($article); $isFeatured = (bool) ($article->featured ?? false); ?>
-                <tr data-pmh-admin-row data-search="<?= e(mb_strtolower($article->title . ' ' . $article->summary . ' ' . ($categories[$article->category]['title'] ?? $article->category))) ?>" data-audience="<?= e($article->audience) ?>" data-status="<?= e($article->published ? 'published' : 'draft') ?>" data-featured="<?= $isFeatured ? '1' : '0' ?>" data-screenshot="<?= trim((string) ($article->screenshot ?? '')) !== '' ? '1' : '0' ?>">
+                <tr data-pmh-admin-row data-search="<?= e(mb_strtolower($article->title . ' ' . $article->summary . ' ' . ($categories[$article->category]['title'] ?? $article->category))) ?>" data-audience="<?= e($article->audience) ?>" data-language="<?= e((string) ($article->language ?? 'en')) ?>" data-status="<?= e($article->published ? 'published' : 'draft') ?>" data-featured="<?= $isFeatured ? '1' : '0' ?>" data-screenshot="<?= trim((string) ($article->screenshot ?? '')) !== '' ? '1' : '0' ?>">
                     <td><?= e((string) $article->block_order) ?></td>
                     <td>
                         <div class="d-flex flex-wrap align-items-center gap-2">
                             <strong><?= e($article->title) ?></strong>
+                            <span class="badge text-bg-secondary"><?= e(strtoupper((string) ($article->language ?? 'en'))) ?></span>
                             <?php if ($isFeatured) : ?><span class="badge text-bg-primary"><?= e(\Fisharebest\Webtrees\I18N::translate('Quick help')) ?></span><?php endif ?>
                             <?php if (trim((string) ($article->screenshot ?? '')) !== '') : ?><span class="badge text-bg-info"><?= e(\Fisharebest\Webtrees\I18N::translate('Screenshot')) ?></span><?php endif ?>
                         </div>

@@ -48,31 +48,28 @@
             return null;
         }
 
-        const box = document.createElement('aside');
-        box.className = 'pmh-contextual-help' + (compact ? ' pmh-contextual-help--compact' : '');
-        box.dataset.pmhContext = contextKey;
-        box.setAttribute('aria-label', config.helpIconLabel || 'Help');
+        const link = document.createElement('a');
+        link.className = 'pmh-contextual-help' + (compact ? ' pmh-contextual-help--compact' : '');
+        link.dataset.pmhContext = contextKey;
+        link.href = details.url;
+        link.setAttribute('aria-label', details.message || config.helpIconLabel || 'Help');
+        link.title = details.message || '';
+        if (config.newTab) {
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+        }
 
         const icon = document.createElement('span');
         icon.className = 'pmh-contextual-help__icon';
         icon.setAttribute('aria-hidden', 'true');
         icon.textContent = '?';
 
-        const message = document.createElement('span');
-        message.className = 'pmh-contextual-help__message';
-        message.textContent = details.message;
+        const label = document.createElement('span');
+        label.className = 'pmh-contextual-help__label';
+        label.textContent = config.openGuideLabel || details.label || 'Help with this page';
 
-        const link = document.createElement('a');
-        link.className = 'pmh-contextual-help__link';
-        link.href = details.url;
-        link.textContent = details.label || config.openGuideLabel || 'Open guide';
-        if (config.newTab) {
-            link.target = '_blank';
-            link.rel = 'noopener';
-        }
-
-        box.append(icon, message, link);
-        return box;
+        link.append(icon, label);
+        return link;
     };
 
     const replaceContextBox = (container, contextKey, compact) => {

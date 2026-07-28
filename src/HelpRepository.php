@@ -16,6 +16,8 @@ use function array_values;
 use function collect;
 use function explode;
 use function implode;
+use function json_decode;
+use function json_encode;
 use function in_array;
 use function is_array;
 use function is_file;
@@ -24,6 +26,8 @@ use function preg_replace;
 use function property_exists;
 use function sort;
 use function strtolower;
+use function str_replace;
+use function strtok;
 use function strip_tags;
 use function trim;
 
@@ -32,6 +36,7 @@ final class HelpRepository
     public const AUDIENCE_VISITORS = 'visitors';
     public const AUDIENCE_MEMBERS = 'members';
     public const AUDIENCE_EVERYONE = 'everyone';
+    public const DEFAULT_LANGUAGE = 'en';
 
     public function __construct(
         private readonly string $moduleName,
@@ -214,6 +219,46 @@ final class HelpRepository
         return $updated;
     }
 
+    /**
+     * Add new resource links and improve selected unchanged starter articles.
+     * Administrator-customised text and existing resource links are never replaced.
+     *
+     * @return array{content:int,links:int}
+     */
+    public function seedRc2Enhancements(Tree $tree): array
+    {
+        $stored = $this->storedArticles($tree)->keyBy('slug');
+        $defaults = collect($this->defaults())->keyBy(static fn (array $article): string => (string) ($article['slug'] ?? ''));
+        $content = 0;
+        $links = 0;
+        $oldBodies = [
+            'enter-places-consistently' => '<p>Follow the place order used by this tree, commonly:</p>\n<p><code>locality, municipality or county, state or region, country</code></p>\n<ul>\n<li>Select an existing place suggestion where it represents the same location.</li>\n<li>Do not create slightly different versions through punctuation or abbreviations alone.</li>\n<li>Use the historical locality in the event place when appropriate, then explain modern boundaries in a note.</li>\n<li>Keep street addresses separate from the broader place hierarchy where webtrees provides address fields.</li>\n<li>Add map coordinates only when reasonably verified.</li>\n</ul>\n<p>Consistent places improve maps, place lists and the country-aware historical context used by Biography.</p>',
+            'understand-names-dates-and-places' => '<p>Family-history records are often inconsistent or incomplete.</p>\n<ul>\n<li>A person may have formal names, a maiden surname, married names, nicknames and alternative spellings.</li>\n<li>A starred given name may identify the part of a formal name by which the person was known. The asterisk itself is not normally displayed in the Biography.</li>\n<li><strong>About</strong>, <strong>before</strong> and <strong>after</strong> show uncertainty.</li>\n<li><strong>Between</strong> or <strong>from/to</strong> records a range rather than an exact day.</li>\n<li>Places may use the historical name, a standard modern hierarchy or both.</li>\n</ul>\n<p>Conflicting records can be retained with notes and sources when the evidence is genuinely uncertain. A difference is not always a mistake.</p>',
+        ];
+
+        foreach ($defaults as $slug => $default) {
+            $article = $stored->get($slug);
+            if (!$article instanceof stdClass) {
+                continue;
+            }
+
+            $defaultLinks = $this->normaliseResourceLinks($default['resource_links'] ?? []);
+            if ($defaultLinks !== '[]' && $this->normaliseResourceLinks((string) ($article->resource_links ?? '[]')) === '[]') {
+                $this->setSetting((int) $article->block_id, 'resource_links', $defaultLinks);
+                ++$links;
+            }
+
+            $oldBody = isset($oldBodies[$slug]) ? str_replace('\\n', "\n", $oldBodies[$slug]) : '';
+            if ($oldBody !== '' && trim((string) $article->body) === trim($oldBody)) {
+                $this->setSetting((int) $article->block_id, 'summary', trim((string) ($default['summary'] ?? $article->summary)));
+                $this->setSetting((int) $article->block_id, 'body', trim((string) ($default['body'] ?? $article->body)));
+                ++$content;
+            }
+        }
+
+        return ['content' => $content, 'links' => $links];
+    }
+
     public function missingDefaultCount(Tree $tree): int
     {
         $existingSlugs = $this->storedArticles($tree)
@@ -297,6 +342,10 @@ final class HelpRepository
                 $row->screenshot_caption = trim((string) ($article['screenshot_caption'] ?? ''));
                 $row->screenshot_source = trim((string) ($article['screenshot_source'] ?? ''));
                 $row->screenshot_source_url = trim((string) ($article['screenshot_source_url'] ?? ''));
+                $row->language = $this->normaliseLanguage((string) ($article['language'] ?? self::DEFAULT_LANGUAGE));
+                $row->translation_key = $this->normaliseTranslationKey((string) ($article['translation_key'] ?? $article['slug'] ?? $article['title'] ?? ''));
+                $row->resource_links = $this->normaliseResourceLinks($article['resource_links'] ?? []);
+                $row->is_language_fallback = false;
                 $row->feedback_yes = 0;
                 $row->feedback_no = 0;
                 $row->is_default = true;
@@ -315,12 +364,45 @@ final class HelpRepository
     }
 
     /** @return Collection<int,object> */
-    public function articlesForAudience(Tree $tree, string $audience, bool $includeUnpublished = false): Collection
-    {
+    public function articlesForAudience(
+        Tree $tree,
+        string $audience,
+        bool $includeUnpublished = false,
+        string|null $language = null
+    ): Collection {
         $audience = $this->normaliseAudience($audience);
-
-        return $this->articles($tree, $includeUnpublished)
+        $articles = $this->articles($tree, $includeUnpublished)
             ->filter(static fn (object $article): bool => $article->audience === self::AUDIENCE_EVERYONE || $article->audience === $audience)
+            ->values();
+
+        return $language === null ? $articles : $this->selectLanguage($articles, $language);
+    }
+
+    /**
+     * Select the best translation of each article for the requested webtrees language.
+     * Exact language tags are preferred, followed by the base language and English.
+     *
+     * @param Collection<int,object> $articles
+     * @return Collection<int,object>
+     */
+    public function selectLanguage(Collection $articles, string $language): Collection
+    {
+        $requested = $this->normaliseLanguage($language);
+        $base = $this->baseLanguage($requested);
+
+        return $articles
+            ->groupBy(static fn (object $article): string => (string) ($article->translation_key ?? $article->slug))
+            ->map(function (Collection $variants) use ($requested, $base): object {
+                $selected = $variants->first(static fn (object $article): bool => $article->language === $requested)
+                    ?? $variants->first(static fn (object $article): bool => $article->language === $base)
+                    ?? $variants->first(static fn (object $article): bool => $article->language === self::DEFAULT_LANGUAGE)
+                    ?? $variants->first();
+
+                $selected->is_language_fallback = $selected->language !== $requested && $selected->language !== $base;
+
+                return $selected;
+            })
+            ->sortBy([['block_order', 'asc'], ['title', 'asc']])
             ->values();
     }
 
@@ -351,6 +433,9 @@ final class HelpRepository
         $screenshotCaption = trim(strip_tags((string) ($data['screenshot_caption'] ?? '')));
         $screenshotSource = trim(strip_tags((string) ($data['screenshot_source'] ?? '')));
         $screenshotSourceUrl = $this->normaliseSourceUrl((string) ($data['screenshot_source_url'] ?? ''));
+        $language = $this->normaliseLanguage((string) ($data['language'] ?? self::DEFAULT_LANGUAGE));
+        $translationKey = $this->normaliseTranslationKey((string) ($data['translation_key'] ?? $slug));
+        $resourceLinks = $this->normaliseResourceLinks($data['resource_links'] ?? []);
         $published = !empty($data['published']) ? '1' : '0';
         $featured = !empty($data['featured']) ? '1' : '0';
         $blockOrder = max(1, (int) ($data['block_order'] ?? 1));
@@ -394,6 +479,9 @@ final class HelpRepository
         $this->setSetting($blockId, 'screenshot_caption', $screenshotCaption);
         $this->setSetting($blockId, 'screenshot_source', $screenshotSource);
         $this->setSetting($blockId, 'screenshot_source_url', $screenshotSourceUrl);
+        $this->setSetting($blockId, 'language', $language);
+        $this->setSetting($blockId, 'translation_key', $translationKey);
+        $this->setSetting($blockId, 'resource_links', $resourceLinks);
 
         return $blockId;
     }
@@ -474,6 +562,10 @@ final class HelpRepository
             $article->screenshot_caption = '';
             $article->screenshot_source = '';
             $article->screenshot_source_url = '';
+            $article->language = self::DEFAULT_LANGUAGE;
+            $article->translation_key = '';
+            $article->resource_links = '[]';
+            $article->is_language_fallback = false;
             $article->published = true;
             $article->featured = false;
             $article->feedback_yes = 0;
@@ -495,6 +587,9 @@ final class HelpRepository
 
             $article->audience = $this->normaliseAudience((string) $article->audience);
             $article->requires_modules = $this->normaliseModuleList((string) $article->requires_modules);
+            $article->language = $this->normaliseLanguage((string) $article->language);
+            $article->translation_key = $this->normaliseTranslationKey((string) ($article->translation_key !== '' ? $article->translation_key : $article->slug));
+            $article->resource_links = $this->normaliseResourceLinks((string) $article->resource_links);
 
             return $article;
         });
@@ -538,6 +633,74 @@ final class HelpRepository
         $value = trim(strip_tags($value));
 
         return filter_var($value, FILTER_VALIDATE_URL) && str_starts_with(strtolower($value), 'https://') ? $value : '';
+    }
+
+    public function normaliseLanguage(string $language): string
+    {
+        $language = trim(str_replace('_', '-', strip_tags($language)));
+        $language = preg_replace('/[^A-Za-z0-9-]/', '', $language) ?? '';
+        if ($language === '') {
+            return self::DEFAULT_LANGUAGE;
+        }
+
+        $parts = explode('-', $language);
+        $parts[0] = strtolower($parts[0]);
+        foreach ($parts as $index => $part) {
+            if ($index > 0 && strlen($part) === 2) {
+                $parts[$index] = strtoupper($part);
+            }
+        }
+
+        return implode('-', $parts);
+    }
+
+    private function baseLanguage(string $language): string
+    {
+        return strtolower((string) (strtok($language, '-') ?: self::DEFAULT_LANGUAGE));
+    }
+
+    public function normaliseTranslationKey(string $value): string
+    {
+        return $this->normaliseSlug($value);
+    }
+
+    /** @return list<array{label:string,url:string}> */
+    public function resourceLinks(object $article): array
+    {
+        $decoded = json_decode((string) ($article->resource_links ?? '[]'), true);
+        if (!is_array($decoded)) {
+            return [];
+        }
+
+        return array_values(array_filter($decoded, static fn (mixed $item): bool =>
+            is_array($item) && isset($item['label'], $item['url']) && is_string($item['label']) && is_string($item['url'])
+        ));
+    }
+
+    private function normaliseResourceLinks(mixed $value): string
+    {
+        if (is_string($value)) {
+            $decoded = json_decode($value, true);
+            $items = is_array($decoded) ? $decoded : [];
+        } elseif (is_array($value)) {
+            $items = $value;
+        } else {
+            $items = [];
+        }
+
+        $normalised = [];
+        foreach ($items as $item) {
+            if (!is_array($item)) {
+                continue;
+            }
+            $label = trim(strip_tags((string) ($item['label'] ?? '')));
+            $url = $this->normaliseSourceUrl((string) ($item['url'] ?? ''));
+            if ($label !== '' && $url !== '') {
+                $normalised[] = ['label' => $label, 'url' => $url];
+            }
+        }
+
+        return (string) json_encode(array_values($normalised), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     }
 
     private function normaliseSlug(string $slug): string

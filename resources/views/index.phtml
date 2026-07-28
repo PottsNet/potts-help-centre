@@ -17,6 +17,8 @@
 /** @var \Fisharebest\Webtrees\Tree $tree */
 /** @var string $moduleName */
 /** @var array<string,string> $moduleRequirements */
+/** @var string $language */
+/** @var bool $hasLanguageFallbacks */
 $audienceParameters = $audienceQuery !== '' ? ['audience' => $audienceQuery] : [];
 $showRoute = static fn (array $parameters = []): string => route('module', array_merge([
     'module' => $moduleName,
@@ -40,6 +42,12 @@ $landingPage = $query === '' && $category === '' && !$showAll;
         </div>
     <?php endif ?>
 
+    <?php if ($hasLanguageFallbacks) : ?>
+        <div class="alert alert-info pmh-language-fallback" role="status">
+            <?= e(\Fisharebest\Webtrees\I18N::translate('Some help articles are shown in English because a translation is not yet available for your selected language (%s).', $language)) ?>
+        </div>
+    <?php endif ?>
+
     <header class="pmh-hero">
         <div>
             <p class="pmh-eyebrow"><?= e($eyebrow) ?></p>
@@ -47,7 +55,8 @@ $landingPage = $query === '' && $category === '' && !$showAll;
             <p><?= e($intro) ?></p>
         </div>
 
-        <form class="pmh-search" method="get" action="<?= e($showRoute()) ?>">
+        <form class="pmh-search" method="post" action="<?= e(route('module', ['module' => $moduleName, 'action' => 'Search', 'tree' => $tree->name()])) ?>">
+            <?= csrf_field() ?>
             <?php if ($audienceQuery !== '') : ?><input type="hidden" name="audience" value="<?= e($audienceQuery) ?>"><?php endif ?>
             <?php if ($category !== '') : ?><input type="hidden" name="category" value="<?= e($category) ?>"><?php endif ?>
             <label class="visually-hidden" for="pmh-search"><?= e(\Fisharebest\Webtrees\I18N::translate('Search the help centre')) ?></label>

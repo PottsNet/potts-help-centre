@@ -7,7 +7,7 @@
 - Understand names, dates and places
 - Enter places consistently
 
-## Bundled annotated guides in 1.0.0-rc.1
+## Bundled annotated guides in 1.0.0-rc.2
 
 - Find a person with quick search
 - Understand the tabs on a person’s page

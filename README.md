@@ -6,24 +6,27 @@ Potts Help Centre is a custom module for webtrees 2.2.x. It provides one inclusi
 
 The public menu uses the compact label **Help**. The landing page identifies the current experience as **Visitor Help Centre** or **Member Help Centre**.
 
-## Version 1.0.0-rc.1
+## Version 1.0.0-rc.2
 
-This is the first release candidate for Potts Help Centre 1.0.0. It retains the existing `potts_member_help` folder, PHP namespace, module identity and database storage so upgrades preserve saved articles, settings and feedback.
+This second release candidate responds to external testing of the search, contextual-help presentation, article usefulness, contact guidance, documentation links and language support. It retains the existing `potts_member_help` folder, PHP namespace, module identity and database storage so upgrades preserve saved articles, settings and feedback.
 
 ### Highlights
 
 - separate visitor, member and shared guidance within one inclusive Help Centre
 - audience-specific **Quick help** cards for common tasks
-- ranked multi-word search across titles, summaries, categories and article content
+- ranked multi-word search across titles, summaries, categories and article content, including installations without pretty URLs
 - topic browsing, article counts and an optional complete article list
 - reading time, generated table of contents, print and copy-link actions
 - previous, next and related-article navigation
-- contextual help beside supported individual pages, family pages and editing forms
+- compact contextual help links beside supported individual pages, family pages and editing forms
 - administrator-editable articles with rich-text and plain-HTML editing modes
 - publication, audience, Quick help, module requirement and ordering controls
 - aggregate helpfulness feedback and an **Articles to review** panel
 - optional article screenshots with captions, alternative text and source attribution
 - twelve bundled illustrated guides using official webtrees material or fictional records
+- article-specific and official webtrees resource links
+- a working contact action using the tree’s configured webtrees contact
+- language-specific article variants, English fallback and JSON translation-pack import/export
 - automatic notice that screens may vary by theme, permissions and enabled modules
 - theme-aware layouts tested for Potts Modern and designed for standard webtrees themes
 - non-destructive upgrade behaviour for existing Potts Member Help installations
@@ -38,6 +41,19 @@ The bundled starter guide contains 71 editable articles:
 - 17 visitor and member topic categories
 
 Guidance covers searching, individual pages, charts, privacy, accounts, people, relationships, facts, events, names, media, sources, research notes and responsible contribution.
+
+## Languages and translations
+
+The bundled starter articles are supplied in English. Version 1.0.0-rc.2 adds multilingual article architecture rather than presenting English content as translated:
+
+- each article has a BCP 47 language code such as `en`, `de`, `fr` or `en-AU`
+- language versions of the same article share a translation-group key
+- the selected webtrees language is matched first, followed by its base language and then English
+- a visible notice identifies English fallback content
+- administrators can export and import JSON language packs
+- user-interface translations can be contributed through files in `resources/lang/`
+
+See [`TRANSLATING.md`](TRANSLATING.md). Complete community translations are not bundled yet, so the module should be described as **multilingual-ready with English starter content**, not as fully translated into every webtrees language.
 
 ## Screenshots
 
@@ -110,10 +126,17 @@ Administrators can:
 - add missing starter articles
 - refresh bundled starter content
 - configure contextual help for each tree
+- create language-specific article versions
+- export or import JSON article language packs
+- add article-specific links to official or local resources
 
 Article bodies use webtrees’ CKEditor when it is active. A plain HTML field remains available as a fallback and saved content is sanitised by webtrees.
 
 Each article can have one optional screenshot selected from the bundled library or supplied by a secure HTTPS address. Bundled files are preferred because an external image address contacts another server whenever the image is displayed. External screenshots are loaded with a no-referrer policy.
+
+## LinkEnhancer compatibility
+
+Potts Help Centre and LinkEnhancer can be used together. LinkEnhancer provides enhanced record links and context-sensitive links to external manuals, while Potts Help Centre provides locally editable visitor and member guidance, screenshots, feedback and site-specific instructions. If both modules place help links in the same area, administrators can disable Potts Help Centre contextual links while retaining the Help Centre itself.
 
 ## Installation
 
@@ -145,7 +168,7 @@ The GitHub repository name is separate from the module’s internal `potts_membe
 
 ## Release status
 
-`1.0.0-rc.1` is a release candidate. Complete the checks in [`TESTING.md`](TESTING.md) on an upgraded site and, where practical, a clean webtrees installation before publishing 1.0.0 as a full release.
+`1.0.0-rc.2` is a release candidate. Complete the checks in [`TESTING.md`](TESTING.md) on an upgraded site and, where practical, a clean webtrees installation before publishing 1.0.0 as a full release.
 
 ## Licence
 

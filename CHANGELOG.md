@@ -1,5 +1,38 @@
 # Changelog
 
+## 1.0.0-rc.2 — 2026-07-29
+
+### Fixed
+
+- Fixed Help Centre searches redirecting to the tree home page on installations that do not use pretty URLs.
+- Added a dedicated POST search action that preserves module, tree, audience and category routing.
+- Re-ran the bundled screenshot migration non-destructively for installations where earlier screenshot assignment was incomplete.
+
+### Added
+
+- Added language codes and translation-group keys to articles.
+- Added exact-language, base-language and English fallback selection.
+- Added visible fallback notices when English content is shown for another selected language.
+- Added JSON language-pack export and import tools for administrators.
+- Added article-specific resource links and automatic official webtrees documentation links.
+- Added a working **Contact the site administrator** action using the tree’s configured webtrees contact form.
+- Added language filtering and language counts to administration.
+- Added `TRANSLATING.md` for community translation contributors.
+
+### Changed
+
+- Replaced the prominent contextual-help panel with a compact **Help with this page** link.
+- Improved the starter articles about places and interpreting names, dates and places with practical examples and cautions.
+- Reduced repetitive contact wording and pre-filled useful diagnostic questions in the contact form.
+- Clarified how Potts Help Centre differs from and can coexist with LinkEnhancer.
+- Updated official forum and documentation references.
+
+### Upgrade safety
+
+- Existing custom article text, language variants, screenshots, settings and feedback are preserved.
+- The two improved starter articles are updated automatically only when their saved text still exactly matches the earlier bundled version.
+- New starter resource links are added only when an article has no existing resource links.
+
 ## 1.0.0-rc.1 — 2026-07-28
 
 ### Added

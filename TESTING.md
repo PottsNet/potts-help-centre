@@ -1,4 +1,4 @@
-# Release-candidate test checklist — 1.0.0-rc.1
+# Release-candidate test checklist — 1.0.0-rc.2
 
 Record the webtrees version, PHP version, theme, browser and device used for each test round.
 
@@ -6,7 +6,7 @@ Record the webtrees version, PHP version, theme, browser and device used for eac
 
 - [ ] Back up the current module folder and database before testing.
 - [ ] Replace an earlier `potts_member_help` folder without deleting database content.
-- [ ] The control panel shows **Potts Help Centre** and version `1.0.0-rc.1`.
+- [ ] The control panel shows **Potts Help Centre** and version `1.0.0-rc.2`.
 - [ ] Existing articles, settings, ordering and feedback totals remain available.
 - [ ] Matching starter articles with no existing image receive bundled screenshots without replacing written instructions or custom images.
 - [ ] The public menu label is **Help**.
@@ -48,6 +48,8 @@ Record the webtrees version, PHP version, theme, browser and device used for eac
 - [ ] A multi-word search finds articles when the words are separated within article text.
 - [ ] Exact title matches rank above body-only matches.
 - [ ] Search within a category retains that category scope.
+- [ ] Search works when webtrees pretty URLs are disabled and does not redirect to the tree home page.
+- [ ] Search preserves an administrator visitor/member preview.
 - [ ] Result counts use correct singular and plural wording.
 - [ ] An empty result shows a clear recovery action.
 
@@ -60,6 +62,8 @@ Record the webtrees version, PHP version, theme, browser and device used for eac
 - [ ] **Print guide** produces a clean article-only print layout.
 - [ ] Previous and next article links work.
 - [ ] Related instructions remain available.
+- [ ] Official webtrees resources appear without duplicate links.
+- [ ] The contact button opens the configured webtrees contact form with article and troubleshooting details pre-filled.
 - [ ] All 12 illustrated starter articles show the correct screenshot, caption, alternative text and source.
 - [ ] Annotated guides contain only fictional example data and remain clearly labelled as illustrations.
 - [ ] Clicking a screenshot opens the full-size image.
@@ -77,7 +81,7 @@ Record the webtrees version, PHP version, theme, browser and device used for eac
 
 - [ ] Dashboard totals match the article list.
 - [ ] Helpful percentage is correct when responses exist and shows a dash when none exist.
-- [ ] Article text, audience, publication and Quick help filters work without reloading.
+- [ ] Article text, audience, language, publication and Quick help filters work without reloading.
 - [ ] Selecting **Show in Quick help** adds the article to the correct audience landing page.
 - [ ] The **Articles to review** panel appears only when sufficient feedback exists.
 - [ ] Visitor and member preview buttons open the correct view.
@@ -85,10 +89,15 @@ Record the webtrees version, PHP version, theme, browser and device used for eac
 - [ ] The editor accepts a bundled `module://` image and a secure HTTPS image address.
 - [ ] Invalid or non-HTTPS image addresses are not displayed.
 - [ ] Clearing the screenshot field removes the image without affecting the article body.
+- [ ] Exporting a language downloads valid JSON containing that language only.
+- [ ] Importing a translated JSON pack adds new variants and updates matching language/translation groups without deleting feedback.
+- [ ] Selecting another webtrees language displays its matching article variant.
+- [ ] Missing translations fall back to English and show a clear fallback notice.
 
 ## Contextual help and themes
 
 - [ ] Individual-page tab guidance updates when tabs change.
+- [ ] Contextual help appears as a compact link rather than a full-width callout.
 - [ ] Family-page guidance appears when enabled.
 - [ ] Editing dialogs receive the correct task-specific guide.
 - [ ] New-tab behaviour protects partially completed forms.

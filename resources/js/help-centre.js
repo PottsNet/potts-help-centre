@@ -114,6 +114,7 @@
         const search = document.querySelector('[data-pmh-admin-search]');
         const audience = document.querySelector('[data-pmh-admin-audience]');
         const status = document.querySelector('[data-pmh-admin-status]');
+        const language = document.querySelector('[data-pmh-admin-language]');
         const count = document.querySelector('[data-pmh-admin-count]');
         if (!table || !search || !audience || !status) {
             return;
@@ -126,11 +127,13 @@
             const query = normalise(search.value);
             const selectedAudience = audience.value;
             const selectedStatus = status.value;
+            const selectedLanguage = language ? language.value : '';
             let visible = 0;
 
             rows.forEach((row) => {
                 const matchesSearch = query === '' || normalise(row.dataset.search).includes(query);
                 const matchesAudience = selectedAudience === '' || row.dataset.audience === selectedAudience;
+                const matchesLanguage = selectedLanguage === '' || row.dataset.language === selectedLanguage;
                 let matchesStatus = selectedStatus === '' || row.dataset.status === selectedStatus;
                 if (selectedStatus === 'featured') {
                     matchesStatus = row.dataset.featured === '1';
@@ -140,7 +143,7 @@
                     matchesStatus = row.dataset.screenshot !== '1';
                 }
 
-                const show = matchesSearch && matchesAudience && matchesStatus;
+                const show = matchesSearch && matchesAudience && matchesLanguage && matchesStatus;
                 row.hidden = !show;
                 if (show) {
                     visible += 1;
@@ -155,6 +158,9 @@
         search.addEventListener('input', filter);
         audience.addEventListener('change', filter);
         status.addEventListener('change', filter);
+        if (language) {
+            language.addEventListener('change', filter);
+        }
         filter();
     };
 

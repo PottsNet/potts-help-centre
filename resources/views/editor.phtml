@@ -8,6 +8,8 @@
 /** @var array<string,bool> $moduleStatus */
 /** @var bool $richTextEditorAvailable */
 /** @var string $screenshotUrl */
+/** @var \Illuminate\Support\Collection<int,object> $translationArticles */
+/** @var string $resourceLinksText */
 $groupedCategories = ['visitors' => [], 'members' => []];
 foreach ($categories as $key => $details) {
     $groupedCategories[$details['group'] ?? 'members'][$key] = $details;
@@ -75,6 +77,13 @@ $previewUrl = $article->block_id > 0 && $article->published && trim((string) $ar
                     </div>
 
                     <div class="border rounded p-3 mb-3">
+                        <h2 class="h5 mb-3"><?= e(\Fisharebest\Webtrees\I18N::translate('Related resources')) ?></h2>
+                        <label class="form-label" for="pmh-resource-links"><?= e(\Fisharebest\Webtrees\I18N::translate('Article-specific links')) ?></label>
+                        <textarea class="form-control" id="pmh-resource-links" name="resource_links" rows="5" placeholder="Official location guidance | https://webtrees.net/faq/locations/"><?= e($resourceLinksText) ?></textarea>
+                        <div class="form-text"><?= e(\Fisharebest\Webtrees\I18N::translate('Enter one secure link per line using: Label | https://address. Official webtrees resources are also shown automatically.')) ?></div>
+                    </div>
+
+                    <div class="border rounded p-3 mb-3">
                         <h2 class="h5 mb-3"><?= e(\Fisharebest\Webtrees\I18N::translate('Article screenshot')) ?></h2>
                         <p class="text-muted"><?= e(\Fisharebest\Webtrees\I18N::translate('Screenshots are optional. Written instructions should remain complete because themes, permissions and enabled modules can change what each user sees.')) ?></p>
 
@@ -134,6 +143,25 @@ $previewUrl = $article->block_id > 0 && $article->published && trim((string) $ar
         <div class="col-lg-4">
             <div class="card">
                 <div class="card-body">
+                    <div class="border rounded p-3 mb-3">
+                        <h2 class="h6 mb-3"><?= e(\Fisharebest\Webtrees\I18N::translate('Language and translation')) ?></h2>
+                        <div class="mb-3">
+                            <label class="form-label" for="pmh-language"><?= e(\Fisharebest\Webtrees\I18N::translate('Article language')) ?></label>
+                            <input class="form-control" id="pmh-language" name="language" value="<?= e((string) ($article->language ?? 'en')) ?>" placeholder="en, de, fr or en-AU" required>
+                            <div class="form-text"><?= e(\Fisharebest\Webtrees\I18N::translate('Use a BCP 47 language code. The Help Centre first looks for the full webtrees language, then its base language and finally English.')) ?></div>
+                        </div>
+                        <div>
+                            <label class="form-label" for="pmh-translation-key"><?= e(\Fisharebest\Webtrees\I18N::translate('Translation group')) ?></label>
+                            <input class="form-control" id="pmh-translation-key" name="translation_key" list="pmh-translation-groups" value="<?= e((string) ($article->translation_key ?? $article->slug)) ?>" placeholder="add-a-partner" required>
+                            <datalist id="pmh-translation-groups">
+                                <?php foreach ($translationArticles->unique('translation_key') as $translationArticle) : ?>
+                                    <option value="<?= e((string) ($translationArticle->translation_key ?? $translationArticle->slug)) ?>"><?= e($translationArticle->title) ?></option>
+                                <?php endforeach ?>
+                            </datalist>
+                            <div class="form-text"><?= e(\Fisharebest\Webtrees\I18N::translate('Use the same translation group for each language version. Give each translated article its own link name.')) ?></div>
+                        </div>
+                    </div>
+
                     <div class="mb-3">
                         <label class="form-label" for="pmh-audience"><?= e(\Fisharebest\Webtrees\I18N::translate('Audience')) ?></label>
                         <select class="form-select" id="pmh-audience" name="audience">

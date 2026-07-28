@@ -15,9 +15,21 @@
 /** @var bool $feedbackGiven */
 /** @var bool $feedbackRecorded */
 /** @var string $screenshotUrl */
+/** @var list<array{label:string,url:string}> $resourceLinks */
+/** @var list<array{label:string,url:string}> $officialResources */
+/** @var string $contactUrl */
+/** @var string $language */
 $categoryTitle = $categories[$article->category]['title'] ?? $article->category;
 $requiredModules = trim((string) ($article->requires_modules ?? '')) === '' ? [] : array_values(array_filter(array_map('trim', explode(',', (string) $article->requires_modules))));
 $audienceParameters = $audienceQuery !== '' ? ['audience' => $audienceQuery] : [];
+$allResources = [];
+$seenResourceUrls = [];
+foreach (array_merge($resourceLinks, $officialResources) as $resource) {
+    if (!isset($seenResourceUrls[$resource['url']])) {
+        $allResources[] = $resource;
+        $seenResourceUrls[$resource['url']] = true;
+    }
+}
 $showRoute = static fn (array $parameters = []): string => route('module', array_merge([
     'module' => $moduleName,
     'action' => 'Show',
@@ -51,6 +63,7 @@ $articleRoute = static fn (string $slug): string => route('module', array_merge(
                 <div class="pmh-card-meta">
                     <span class="pmh-topic"><?= e($categoryTitle) ?></span>
                     <span class="pmh-reading-time"><?= e(\Fisharebest\Webtrees\I18N::plural('%s minute read', '%s minutes read', $readingTime, (string) $readingTime)) ?></span>
+                    <span class="pmh-feature-badge"><?= e(strtoupper((string) ($article->language ?? 'en'))) ?></span>
                     <?php foreach ($requiredModules as $requiredModule) : ?>
                         <span class="pmh-feature-badge"><?= e($moduleRequirements[$requiredModule] ?? $requiredModule) ?></span>
                     <?php endforeach ?>
@@ -62,6 +75,12 @@ $articleRoute = static fn (string $slug): string => route('module', array_merge(
                     <button class="btn btn-sm btn-outline-secondary" type="button" data-pmh-copy-link data-copy-label="<?= e(\Fisharebest\Webtrees\I18N::translate('Copy link')) ?>" data-copied-label="<?= e(\Fisharebest\Webtrees\I18N::translate('Link copied')) ?>"><?= e(\Fisharebest\Webtrees\I18N::translate('Copy link')) ?></button>
                 </div>
             </header>
+
+            <?php if ((bool) ($article->is_language_fallback ?? false)) : ?>
+                <div class="alert alert-info pmh-language-fallback" role="status">
+                    <?= e(\Fisharebest\Webtrees\I18N::translate('This article is shown in English because a translation is not yet available for your selected language (%s).', $language)) ?>
+                </div>
+            <?php endif ?>
 
             <?php if ($screenshotUrl !== '') : ?>
                 <figure class="pmh-article-screenshot">
@@ -147,12 +166,22 @@ $articleRoute = static fn (string $slug): string => route('module', array_merge(
 
             <div class="pmh-side-card">
                 <h2><?= e(\Fisharebest\Webtrees\I18N::translate('Need more help?')) ?></h2>
-                <?php if ($audience === 'visitors') : ?>
-                    <p><?= e(\Fisharebest\Webtrees\I18N::translate('Contact the site administrator when you cannot find a relative, need access to private information or would like to provide a correction. Include the person’s name and enough detail to identify the record.')) ?></p>
-                <?php else : ?>
-                    <p><?= e(\Fisharebest\Webtrees\I18N::translate('When the instructions do not match what you can see, your editing permissions or active theme may be different. Contact the site administrator and include the person’s name and the task you are trying to complete.')) ?></p>
+                <p><?= e(\Fisharebest\Webtrees\I18N::translate('Include the person or record involved, what you tried and what happened. Add a page link or screenshot where useful.')) ?></p>
+                <?php if ($contactUrl !== '') : ?>
+                    <a class="btn btn-outline-primary pmh-contact-action" href="<?= e($contactUrl) ?>"><?= e(\Fisharebest\Webtrees\I18N::translate('Contact the site administrator')) ?></a>
                 <?php endif ?>
             </div>
+
+            <?php if ($allResources !== []) : ?>
+                <div class="pmh-side-card">
+                    <h2><?= e(\Fisharebest\Webtrees\I18N::translate('Useful links')) ?></h2>
+                    <ul class="pmh-resource-list">
+                        <?php foreach ($allResources as $resource) : ?>
+                            <li><a href="<?= e($resource['url']) ?>" target="_blank" rel="noopener noreferrer"><?= e($resource['label']) ?></a></li>
+                        <?php endforeach ?>
+                    </ul>
+                </div>
+            <?php endif ?>
 
             <?php if ($related->isNotEmpty()) : ?>
                 <div class="pmh-side-card">

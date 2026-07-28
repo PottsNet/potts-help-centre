@@ -2,11 +2,11 @@
 
 ## Release package
 
-Use the named GitHub release asset `potts_help_centre_v1.0.0-rc.1.zip`. Do not install GitHub’s automatic **Source code.zip** archive because it may not preserve the required enclosing module folder.
+Use the named GitHub release asset `potts_help_centre_v1.0.0-rc.2.zip`. Do not install GitHub’s automatic **Source code.zip** archive because it may not preserve the required enclosing module folder.
 
 ## New installation
 
-1. Extract `potts_help_centre_v1.0.0-rc.1.zip`.
+1. Extract `potts_help_centre_v1.0.0-rc.2.zip`.
 2. Upload the enclosed `potts_member_help` folder to `modules_v4/`.
 3. Confirm the final path is `modules_v4/potts_member_help/module.php`.
 4. Open **Control panel → Modules → All modules**.
@@ -21,7 +21,7 @@ Use the named GitHub release asset `potts_help_centre_v1.0.0-rc.1.zip`. Do not i
 2. Replace the existing folder with the `potts_member_help` folder from this release ZIP.
 3. Do not rename the installation folder and do not delete database records.
 4. Open **Potts Help Centre** in the control panel.
-5. Confirm the displayed version is `1.0.0-rc.1`.
+5. Confirm the displayed version is `1.0.0-rc.2`.
 6. Review the dashboard and visitor/member previews.
 7. Clear the webtrees cache and hard-refresh the browser if older wording or styling remains visible.
 
@@ -29,7 +29,7 @@ The display name and GitHub repository name do not change the internal module id
 
 ## Starter article choices
 
-On first use after upgrading, the module non-destructively marks bundled common-task articles for Quick help and assigns missing bundled screenshots. This does not replace article wording, existing custom screenshots or feedback.
+On first use after upgrading, the module non-destructively marks bundled common-task articles for Quick help, assigns missing bundled screenshots and adds new resource links where none exist. Two improved starter articles are refreshed only when their earlier bundled text is still unchanged. This does not replace article wording, existing custom screenshots or feedback.
 
 - **Add missing articles** adds only new link names and is non-destructive.
 - **Refresh starter guide** updates bundled articles with matching link names and adds any missing bundled articles.
@@ -53,3 +53,8 @@ The module uses webtrees’ existing block and block-setting tables. No SQL scri
 Keep `resources/screenshots/` when copying or updating the module. Bundled images are served from the module and are the preferred option.
 
 Administrators may also enter a secure HTTPS image address. External images contact the remote server when displayed. Potts Help Centre applies `referrerpolicy="no-referrer"`, but administrators should still use a trusted host and avoid images containing private information.
+
+
+## Languages
+
+English starter articles are installed by default. Administrators can create another language version in the article editor by using the same **Translation group** and a different article language and link name. Language packs can be exported and imported from the module settings page. See `TRANSLATING.md`.
